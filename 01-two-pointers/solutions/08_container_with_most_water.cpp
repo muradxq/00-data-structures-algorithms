@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include <vector>
+#include <climits>
 
 using namespace std;
 
@@ -28,8 +29,19 @@ using namespace std;
 int maxArea(vector<int>& height) {
     // Your implementation here
     // Hint: Start with widest container, move the shorter line inward
-    
-    return 0;
+    int l = 0;
+    int r = height.size()-1;
+    int maxArea = INT_MIN;
+    while (l < r) {
+        int area = (r-l) * min(height[l],height[r]);
+        maxArea = max(maxArea, area);
+        if (height[l] < height[r]) {
+            l++;
+        } else {
+            r--;
+        }
+    }
+    return maxArea;
 }
 
 // ============================================================================

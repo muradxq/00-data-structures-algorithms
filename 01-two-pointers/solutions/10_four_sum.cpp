@@ -28,8 +28,45 @@ using namespace std;
 vector<vector<int>> fourSum(vector<int>& nums, int target) {
     // Your implementation here
     // Hint: Similar to 3Sum, but with one more outer loop
-    
-    return {};
+    std::sort(nums.begin(), nums.end());
+    vector<vector<int>> res;
+    int n = nums.size();
+    for (int i0 = 0; i0 < n - 3; i0++) {
+        // Skip duplicates for first element
+        if (i0 > 0 && nums[i0] == nums[i0 - 1]) {
+            continue;
+        }
+        for(int i1 = i0 + 1; i1 < n - 2; i1++) {
+            // Skip duplicates for second element
+            if (i1 > i0 + 1 && nums[i1] == nums[i1 - 1]) {
+                continue;
+            }
+            int l = i1 + 1;
+            int r = n - 1;
+            while (l < r) {
+                long long sum = (long long)nums[i0] + nums[i1] + nums[l] + nums[r];
+                
+                if (sum == target) {
+                    res.push_back({nums[i0], nums[i1], nums[l], nums[r]});
+                    // Skip duplicates for left pointer
+                    while (l < r && nums[l] == nums[l + 1]) {
+                        l++;
+                    }
+                    // Skip duplicates for right pointer
+                    while (l < r && nums[r] == nums[r - 1]) {
+                        r--;
+                    }
+                    l++;
+                    r--;
+                } else if (sum > target) {
+                    r--;
+                } else {
+                    l++;
+                }
+            }
+        }
+    }
+    return res;
 }
 
 // ============================================================================

@@ -43,8 +43,20 @@ ListNode* removeNthFromEnd(ListNode* head, int n) {
     // Your implementation here
     // Hint: Use dummy node to handle edge case of removing head
     // Move fast pointer n steps ahead, then move both until fast->next is null
-    
-    return nullptr;
+    ListNode* dummy = new ListNode(0, head);
+    ListNode* p0 = dummy;
+    ListNode* p1 = dummy;
+    int cnt = 0;
+    while (p1 && cnt < n) {
+        p1 = p1->next;
+        cnt++;
+    }
+    while (p1->next) {
+        p1 = p1->next; 
+        p0 = p0->next;
+    }
+    p0->next = p0->next->next;
+    return dummy->next;
 }
 
 // ============================================================================

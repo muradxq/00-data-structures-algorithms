@@ -28,8 +28,27 @@ int trap(vector<int>& height) {
     // Your implementation here
     // Hint: Water at position = min(maxLeft, maxRight) - height[i]
     // Use two pointers to track max heights from both sides
-    
-    return 0;
+    int n = height.size();
+    if(n == 0) 
+        return 0;
+    int l = 0;
+    int r = n - 1;
+    int leftMax = height[0];
+    int rightMax = height[n-1];
+    int water = 0;
+
+    while (l < r) {
+        if (leftMax < rightMax) {
+            l++;
+            leftMax = max(leftMax, height[l]);
+            water += leftMax - height[l];
+        } else {
+            r--;
+            rightMax = max(rightMax, height[r]);
+            water += rightMax - height[r];
+        }
+    }
+    return water;
 }
 
 // ============================================================================

@@ -28,7 +28,20 @@ void sortColors(vector<int>& nums) {
     // Your implementation here
     // Hint: Use three pointers - low, mid, high
     // 0s go to low region, 2s go to high region
+    int low = 0, mid = 0, high = nums.size() - 1;
     
+    while (mid <= high) {
+        if (nums[mid] == 0) {
+            std::swap(nums[low], nums[mid]);
+            low++;
+            mid++;
+        } else if (nums[mid] == 1) {
+            mid++;
+        } else {  // nums[mid] == 2
+            std::swap(nums[mid], nums[high]);
+            high--; 
+        }
+    }
 }
 
 // ============================================================================
