@@ -1,0 +1,5 @@
+# Ignore solution files from AI suggestions
+# The goal is to practice writing solutions yourself!
+
+# All .cpp files in any solutions directory
+**/solutions/*.cpp

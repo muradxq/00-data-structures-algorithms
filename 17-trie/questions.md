@@ -18,35 +18,65 @@
 
 Implement insert, search, and startsWith.
 
+```
+Operations:
+- insert("apple")
+- search("apple") -> true
+- search("app") -> false
+- startsWith("app") -> true
+```
+
+**Approach:**
+- Each node has 26 children (for lowercase letters)
+- Track end of word with boolean flag
+
 **Solution:**
-```python
-class Trie:
-    def __init__(self):
-        self.children = {}
-        self.is_end = False
+```cpp
+class Trie {
+    struct TrieNode {
+        TrieNode* children[26] = {nullptr};
+        bool isEnd = false;
+    };
     
-    def insert(self, word):
-        node = self
-        for c in word:
-            if c not in node.children:
-                node.children[c] = Trie()
-            node = node.children[c]
-        node.is_end = True
+    TrieNode* root;
     
-    def search(self, word):
-        node = self._find(word)
-        return node is not None and node.is_end
+public:
+    Trie() {
+        root = new TrieNode();
+    }
     
-    def startsWith(self, prefix):
-        return self._find(prefix) is not None
+    void insert(string word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            int idx = c - 'a';
+            if (!node->children[idx]) {
+                node->children[idx] = new TrieNode();
+            }
+            node = node->children[idx];
+        }
+        node->isEnd = true;
+    }
     
-    def _find(self, prefix):
-        node = self
-        for c in prefix:
-            if c not in node.children:
-                return None
-            node = node.children[c]
-        return node
+    bool search(string word) {
+        TrieNode* node = find(word);
+        return node && node->isEnd;
+    }
+    
+    bool startsWith(string prefix) {
+        return find(prefix) != nullptr;
+    }
+    
+private:
+    TrieNode* find(const string& prefix) {
+        TrieNode* node = root;
+        for (char c : prefix) {
+            int idx = c - 'a';
+            if (!node->children[idx]) return nullptr;
+            node = node->children[idx];
+        }
+        return node;
+    }
+};
 ```
 **Complexity:** All operations O(m), Space O(n×m)
 
@@ -57,39 +87,143 @@ class Trie:
 
 Support '.' wildcard in search.
 
+```
+Operations:
+- addWord("bad")
+- addWord("dad")
+- search("pad") -> false
+- search("bad") -> true
+- search(".ad") -> true
+- search("b..") -> true
+```
+
+**Approach:**
+- Same as basic Trie for add
+- For search with '.', try all children recursively
+
 **Solution:**
-```python
-class WordDictionary:
-    def __init__(self):
-        self.children = {}
-        self.is_end = False
+```cpp
+class WordDictionary {
+    struct TrieNode {
+        TrieNode* children[26] = {nullptr};
+        bool isEnd = false;
+    };
     
-    def addWord(self, word):
-        node = self
-        for c in word:
-            if c not in node.children:
-                node.children[c] = WordDictionary()
-            node = node.children[c]
-        node.is_end = True
+    TrieNode* root;
     
-    def search(self, word):
-        return self._search(word, 0)
+public:
+    WordDictionary() {
+        root = new TrieNode();
+    }
     
-    def _search(self, word, idx):
-        if idx == len(word):
-            return self.is_end
+    void addWord(string word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            int idx = c - 'a';
+            if (!node->children[idx]) {
+                node->children[idx] = new TrieNode();
+            }
+            node = node->children[idx];
+        }
+        node->isEnd = true;
+    }
+    
+    bool search(string word) {
+        return searchHelper(word, 0, root);
+    }
+    
+private:
+    bool searchHelper(const string& word, int idx, TrieNode* node) {
+        if (!node) return false;
+        if (idx == word.size()) return node->isEnd;
         
-        c = word[idx]
-        if c == '.':
-            for child in self.children.values():
-                if child._search(word, idx + 1):
-                    return True
-            return False
-        elif c in self.children:
-            return self.children[c]._search(word, idx + 1)
-        return False
+        char c = word[idx];
+        if (c == '.') {
+            for (int i = 0; i < 26; i++) {
+                if (searchHelper(word, idx + 1, node->children[i])) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return searchHelper(word, idx + 1, node->children[c - 'a']);
+        }
+    }
+};
 ```
 **Complexity:** Add O(m), Search O(26^m) worst case with all dots
+
+---
+
+### 4. Replace Words
+**LeetCode #648**
+
+Replace words in sentence with their root (shortest prefix in dictionary).
+
+```
+Input: dictionary = ["cat","bat","rat"], sentence = "the cattle was rattled by the battery"
+Output: "the cat was rat by the bat"
+```
+
+**Approach:**
+- Build Trie from dictionary
+- For each word, find shortest prefix that exists in Trie
+
+**Solution:**
+```cpp
+class Solution {
+    struct TrieNode {
+        TrieNode* children[26] = {nullptr};
+        string word;
+    };
+    
+public:
+    string replaceWords(vector<string>& dictionary, string sentence) {
+        TrieNode* root = new TrieNode();
+        
+        // Build Trie
+        for (const string& word : dictionary) {
+            TrieNode* node = root;
+            for (char c : word) {
+                int idx = c - 'a';
+                if (!node->children[idx]) {
+                    node->children[idx] = new TrieNode();
+                }
+                node = node->children[idx];
+            }
+            node->word = word;
+        }
+        
+        // Process sentence
+        stringstream ss(sentence);
+        string word, result;
+        bool first = true;
+        
+        while (ss >> word) {
+            if (!first) result += " ";
+            first = false;
+            
+            TrieNode* node = root;
+            string replacement = word;
+            
+            for (char c : word) {
+                int idx = c - 'a';
+                if (!node->children[idx]) break;
+                node = node->children[idx];
+                if (!node->word.empty()) {
+                    replacement = node->word;
+                    break;
+                }
+            }
+            
+            result += replacement;
+        }
+        
+        return result;
+    }
+};
+```
+**Complexity:** Time O(d×w + s×w), Space O(d×w) where d = dictionary size, w = word length, s = sentence words
 
 ---
 
@@ -106,50 +240,73 @@ Input: board = [["o","a","a","n"],["e","t","a","e"],["i","h","k","r"],["i","f","
 Output: ["eat","oath"]
 ```
 
-**Solution:**
-```python
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.word = None
+**Approach:**
+- Build Trie from words
+- DFS from each cell, following Trie paths
+- Mark found words to avoid duplicates
 
-def findWords(board, words):
-    root = TrieNode()
+**Solution:**
+```cpp
+class Solution {
+    struct TrieNode {
+        TrieNode* children[26] = {nullptr};
+        string word;
+    };
     
-    # Build trie
-    for word in words:
-        node = root
-        for c in word:
-            if c not in node.children:
-                node.children[c] = TrieNode()
-            node = node.children[c]
-        node.word = word
+    int rows, cols;
+    vector<string> result;
     
-    result = []
-    rows, cols = len(board), len(board[0])
-    
-    def dfs(r, c, node):
-        char = board[r][c]
-        if char not in node.children:
-            return
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        rows = board.size();
+        cols = board[0].size();
         
-        child = node.children[char]
-        if child.word:
-            result.append(child.word)
-            child.word = None  # Avoid duplicates
+        // Build Trie
+        TrieNode* root = new TrieNode();
+        for (const string& word : words) {
+            TrieNode* node = root;
+            for (char c : word) {
+                int idx = c - 'a';
+                if (!node->children[idx]) {
+                    node->children[idx] = new TrieNode();
+                }
+                node = node->children[idx];
+            }
+            node->word = word;
+        }
         
-        board[r][c] = '#'
-        for dr, dc in [(0,1), (0,-1), (1,0), (-1,0)]:
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] != '#':
-                dfs(nr, nc, child)
-        board[r][c] = char
+        // Search
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                dfs(board, r, c, root);
+            }
+        }
+        
+        return result;
+    }
     
-    for r in range(rows):
-        for c in range(cols):
-            dfs(r, c, root)
-    
-    return result
+private:
+    void dfs(vector<vector<char>>& board, int r, int c, TrieNode* node) {
+        if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+        
+        char ch = board[r][c];
+        if (ch == '#' || !node->children[ch - 'a']) return;
+        
+        node = node->children[ch - 'a'];
+        
+        if (!node->word.empty()) {
+            result.push_back(node->word);
+            node->word.clear();  // Avoid duplicates
+        }
+        
+        board[r][c] = '#';
+        dfs(board, r + 1, c, node);
+        dfs(board, r - 1, c, node);
+        dfs(board, r, c + 1, node);
+        dfs(board, r, c - 1, node);
+        board[r][c] = ch;
+    }
+};
 ```
 **Complexity:** Time O(m×n×4^L), Space O(total characters in words)
 
@@ -157,10 +314,10 @@ def findWords(board, words):
 
 ## 📚 Study Tips for Trie
 
-1. **Know when to use:** Prefix operations
-2. **Space trade-off:** Array vs dictionary for children
+1. **Know when to use:** Prefix operations, autocomplete, spell checking
+2. **Space trade-off:** Array vs map for children
 3. **Combine with DFS:** For grid/word search problems
-4. **Optimization:** Prune empty branches
+4. **Optimization:** Prune empty branches, store word at end node
 
 ---
 

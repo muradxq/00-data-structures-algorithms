@@ -37,19 +37,22 @@ Output: [1,2]
 - If sum > target, move right pointer
 
 **Solution:**
-```python
-def twoSum(numbers, target):
-    left, right = 0, len(numbers) - 1
+```cpp
+vector<int> twoSum(vector<int>& numbers, int target) {
+    int left = 0, right = numbers.size() - 1;
     
-    while left < right:
-        curr_sum = numbers[left] + numbers[right]
-        if curr_sum == target:
-            return [left + 1, right + 1]
-        elif curr_sum < target:
-            left += 1
-        else:
-            right -= 1
-    return []
+    while (left < right) {
+        int curr_sum = numbers[left] + numbers[right];
+        if (curr_sum == target) {
+            return {left + 1, right + 1};
+        } else if (curr_sum < target) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+    return {};
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -71,24 +74,29 @@ Output: true
 - Compare lowercase versions
 
 **Solution:**
-```python
-def isPalindrome(s):
-    left, right = 0, len(s) - 1
+```cpp
+bool isPalindrome(string s) {
+    int left = 0, right = s.size() - 1;
     
-    while left < right:
-        # Skip non-alphanumeric
-        while left < right and not s[left].isalnum():
-            left += 1
-        while left < right and not s[right].isalnum():
-            right -= 1
+    while (left < right) {
+        // Skip non-alphanumeric
+        while (left < right && !isalnum(s[left])) {
+            left++;
+        }
+        while (left < right && !isalnum(s[right])) {
+            right--;
+        }
         
-        if s[left].lower() != s[right].lower():
-            return False
+        if (tolower(s[left]) != tolower(s[right])) {
+            return false;
+        }
         
-        left += 1
-        right -= 1
+        left++;
+        right--;
+    }
     
-    return True
+    return true;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -110,18 +118,20 @@ Output: 2, nums = [1,2,_]
 - When fast finds new element, copy to slow position
 
 **Solution:**
-```python
-def removeDuplicates(nums):
-    if not nums:
-        return 0
+```cpp
+int removeDuplicates(vector<int>& nums) {
+    if (nums.empty()) return 0;
     
-    slow = 0
-    for fast in range(1, len(nums)):
-        if nums[fast] != nums[slow]:
-            slow += 1
-            nums[slow] = nums[fast]
+    int slow = 0;
+    for (int fast = 1; fast < nums.size(); fast++) {
+        if (nums[fast] != nums[slow]) {
+            slow++;
+            nums[slow] = nums[fast];
+        }
+    }
     
-    return slow + 1
+    return slow + 1;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -143,13 +153,16 @@ Output: [1,3,12,0,0]
 - Swap when fast finds non-zero
 
 **Solution:**
-```python
-def moveZeroes(nums):
-    slow = 0
-    for fast in range(len(nums)):
-        if nums[fast] != 0:
-            nums[slow], nums[fast] = nums[fast], nums[slow]
-            slow += 1
+```cpp
+void moveZeroes(vector<int>& nums) {
+    int slow = 0;
+    for (int fast = 0; fast < nums.size(); fast++) {
+        if (nums[fast] != 0) {
+            swap(nums[slow], nums[fast]);
+            slow++;
+        }
+    }
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -171,26 +184,29 @@ Output: [0,1,9,16,100]
 - Fill result array from end to start
 
 **Solution:**
-```python
-def sortedSquares(nums):
-    n = len(nums)
-    result = [0] * n
-    left, right = 0, n - 1
-    pos = n - 1
+```cpp
+vector<int> sortedSquares(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> result(n);
+    int left = 0, right = n - 1;
+    int pos = n - 1;
     
-    while left <= right:
-        left_sq = nums[left] ** 2
-        right_sq = nums[right] ** 2
+    while (left <= right) {
+        int left_sq = nums[left] * nums[left];
+        int right_sq = nums[right] * nums[right];
         
-        if left_sq > right_sq:
-            result[pos] = left_sq
-            left += 1
-        else:
-            result[pos] = right_sq
-            right -= 1
-        pos -= 1
+        if (left_sq > right_sq) {
+            result[pos] = left_sq;
+            left++;
+        } else {
+            result[pos] = right_sq;
+            right--;
+        }
+        pos--;
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -214,36 +230,43 @@ Output: [[-1,-1,2],[-1,0,1]]
 - Skip duplicates to avoid duplicate triplets
 
 **Solution:**
-```python
-def threeSum(nums):
-    nums.sort()
-    result = []
+```cpp
+vector<vector<int>> threeSum(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> result;
     
-    for i in range(len(nums) - 2):
-        # Skip duplicates for first element
-        if i > 0 and nums[i] == nums[i - 1]:
-            continue
+    for (int i = 0; i < (int)nums.size() - 2; i++) {
+        // Skip duplicates for first element
+        if (i > 0 && nums[i] == nums[i - 1]) {
+            continue;
+        }
         
-        left, right = i + 1, len(nums) - 1
+        int left = i + 1, right = nums.size() - 1;
         
-        while left < right:
-            total = nums[i] + nums[left] + nums[right]
+        while (left < right) {
+            int total = nums[i] + nums[left] + nums[right];
             
-            if total == 0:
-                result.append([nums[i], nums[left], nums[right]])
-                # Skip duplicates
-                while left < right and nums[left] == nums[left + 1]:
-                    left += 1
-                while left < right and nums[right] == nums[right - 1]:
-                    right -= 1
-                left += 1
-                right -= 1
-            elif total < 0:
-                left += 1
-            else:
-                right -= 1
+            if (total == 0) {
+                result.push_back({nums[i], nums[left], nums[right]});
+                // Skip duplicates
+                while (left < right && nums[left] == nums[left + 1]) {
+                    left++;
+                }
+                while (left < right && nums[right] == nums[right - 1]) {
+                    right--;
+                }
+                left++;
+                right--;
+            } else if (total < 0) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n²), Space O(1) excluding output
 
@@ -260,28 +283,33 @@ Output: 2 (because -1 + 2 + 1 = 2)
 ```
 
 **Solution:**
-```python
-def threeSumClosest(nums, target):
-    nums.sort()
-    closest = float('inf')
+```cpp
+int threeSumClosest(vector<int>& nums, int target) {
+    sort(nums.begin(), nums.end());
+    int closest = nums[0] + nums[1] + nums[2];
     
-    for i in range(len(nums) - 2):
-        left, right = i + 1, len(nums) - 1
+    for (int i = 0; i < (int)nums.size() - 2; i++) {
+        int left = i + 1, right = nums.size() - 1;
         
-        while left < right:
-            total = nums[i] + nums[left] + nums[right]
+        while (left < right) {
+            int total = nums[i] + nums[left] + nums[right];
             
-            if abs(total - target) < abs(closest - target):
-                closest = total
+            if (abs(total - target) < abs(closest - target)) {
+                closest = total;
+            }
             
-            if total < target:
-                left += 1
-            elif total > target:
-                right -= 1
-            else:
-                return target
+            if (total < target) {
+                left++;
+            } else if (total > target) {
+                right--;
+            } else {
+                return target;
+            }
+        }
+    }
     
-    return closest
+    return closest;
+}
 ```
 **Complexity:** Time O(n²), Space O(1)
 
@@ -302,22 +330,25 @@ Output: 49
 - Move the shorter line inward (only way to potentially find larger area)
 
 **Solution:**
-```python
-def maxArea(height):
-    left, right = 0, len(height) - 1
-    max_area = 0
+```cpp
+int maxArea(vector<int>& height) {
+    int left = 0, right = height.size() - 1;
+    int max_area = 0;
     
-    while left < right:
-        width = right - left
-        h = min(height[left], height[right])
-        max_area = max(max_area, width * h)
+    while (left < right) {
+        int width = right - left;
+        int h = min(height[left], height[right]);
+        max_area = max(max_area, width * h);
         
-        if height[left] < height[right]:
-            left += 1
-        else:
-            right -= 1
+        if (height[left] < height[right]) {
+            left++;
+        } else {
+            right--;
+        }
+    }
     
-    return max_area
+    return max_area;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -338,21 +369,24 @@ Output: [0,0,1,1,2,2]
 - 0 goes to low region, 2 goes to high region
 
 **Solution:**
-```python
-def sortColors(nums):
-    low, mid, high = 0, 0, len(nums) - 1
+```cpp
+void sortColors(vector<int>& nums) {
+    int low = 0, mid = 0, high = nums.size() - 1;
     
-    while mid <= high:
-        if nums[mid] == 0:
-            nums[low], nums[mid] = nums[mid], nums[low]
-            low += 1
-            mid += 1
-        elif nums[mid] == 1:
-            mid += 1
-        else:  # nums[mid] == 2
-            nums[mid], nums[high] = nums[high], nums[mid]
-            high -= 1
-            # Don't increment mid, need to check swapped value
+    while (mid <= high) {
+        if (nums[mid] == 0) {
+            swap(nums[low], nums[mid]);
+            low++;
+            mid++;
+        } else if (nums[mid] == 1) {
+            mid++;
+        } else {  // nums[mid] == 2
+            swap(nums[mid], nums[high]);
+            high--;
+            // Don't increment mid, need to check swapped value
+        }
+    }
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -364,47 +398,103 @@ def sortColors(nums):
 Find all unique quadruplets that sum to target.
 
 **Solution:**
-```python
-def fourSum(nums, target):
-    nums.sort()
-    result = []
-    n = len(nums)
+```cpp
+vector<vector<int>> fourSum(vector<int>& nums, int target) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> result;
+    int n = nums.size();
     
-    for i in range(n - 3):
-        if i > 0 and nums[i] == nums[i - 1]:
-            continue
+    for (int i = 0; i < n - 3; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) {
+            continue;
+        }
         
-        for j in range(i + 1, n - 2):
-            if j > i + 1 and nums[j] == nums[j - 1]:
-                continue
+        for (int j = i + 1; j < n - 2; j++) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) {
+                continue;
+            }
             
-            left, right = j + 1, n - 1
+            int left = j + 1, right = n - 1;
             
-            while left < right:
-                total = nums[i] + nums[j] + nums[left] + nums[right]
+            while (left < right) {
+                long long total = (long long)nums[i] + nums[j] + nums[left] + nums[right];
                 
-                if total == target:
-                    result.append([nums[i], nums[j], nums[left], nums[right]])
-                    while left < right and nums[left] == nums[left + 1]:
-                        left += 1
-                    while left < right and nums[right] == nums[right - 1]:
-                        right -= 1
-                    left += 1
-                    right -= 1
-                elif total < target:
-                    left += 1
-                else:
-                    right -= 1
+                if (total == target) {
+                    result.push_back({nums[i], nums[j], nums[left], nums[right]});
+                    while (left < right && nums[left] == nums[left + 1]) {
+                        left++;
+                    }
+                    while (left < right && nums[right] == nums[right - 1]) {
+                        right--;
+                    }
+                    left++;
+                    right--;
+                } else if (total < target) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n³), Space O(1)
 
 ---
 
+### 11. Remove Nth Node From End of List
+**LeetCode #19**
+
+Remove the nth node from the end of a linked list.
+
+```
+Input: head = [1,2,3,4,5], n = 2
+Output: [1,2,3,5]
+```
+
+**Approach:**
+- Use two pointers: fast and slow
+- Move fast pointer n steps ahead
+- Then move both pointers until fast reaches end
+- Slow will be at (n+1)th node from end
+- Remove the next node
+
+**Solution:**
+```cpp
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+    ListNode* dummy = new ListNode(0);
+    dummy->next = head;
+    
+    ListNode* fast = dummy;
+    ListNode* slow = dummy;
+    
+    // Move fast n+1 steps ahead
+    for (int i = 0; i <= n; i++) {
+        fast = fast->next;
+    }
+    
+    // Move both until fast reaches end
+    while (fast != nullptr) {
+        fast = fast->next;
+        slow = slow->next;
+    }
+    
+    // Remove nth node from end
+    slow->next = slow->next->next;
+    
+    return dummy->next;
+}
+```
+**Complexity:** Time O(n), Space O(1)
+
+---
+
 ## 🔴 Hard Problems
 
-### 11. Trapping Rain Water
+### 12. Trapping Rain Water
 **LeetCode #42**
 
 Calculate how much water can be trapped after rain.
@@ -419,26 +509,28 @@ Output: 6
 - Use two pointers to track max heights from both sides
 
 **Solution:**
-```python
-def trap(height):
-    if not height:
-        return 0
+```cpp
+int trap(vector<int>& height) {
+    if (height.empty()) return 0;
     
-    left, right = 0, len(height) - 1
-    left_max, right_max = height[left], height[right]
-    water = 0
+    int left = 0, right = height.size() - 1;
+    int left_max = height[left], right_max = height[right];
+    int water = 0;
     
-    while left < right:
-        if left_max < right_max:
-            left += 1
-            left_max = max(left_max, height[left])
-            water += left_max - height[left]
-        else:
-            right -= 1
-            right_max = max(right_max, height[right])
-            water += right_max - height[right]
+    while (left < right) {
+        if (left_max < right_max) {
+            left++;
+            left_max = max(left_max, height[left]);
+            water += left_max - height[left];
+        } else {
+            right--;
+            right_max = max(right_max, height[right]);
+            water += right_max - height[right];
+        }
+    }
     
-    return water
+    return water;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 

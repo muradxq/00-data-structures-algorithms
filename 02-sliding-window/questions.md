@@ -32,17 +32,62 @@ Input: nums = [1,12,-5,-6,50,3], k = 4
 Output: 12.75 (subarray [12,-5,-6,50])
 ```
 
+**Approach:**
+- Use fixed-size sliding window
+- Calculate initial window sum, then slide by adding new and removing old element
+
 **Solution:**
-```python
-def findMaxAverage(nums, k):
-    window_sum = sum(nums[:k])
-    max_sum = window_sum
+```cpp
+double findMaxAverage(vector<int>& nums, int k) {
+    double windowSum = 0;
+    for (int i = 0; i < k; i++) {
+        windowSum += nums[i];
+    }
+    double maxSum = windowSum;
     
-    for i in range(k, len(nums)):
-        window_sum += nums[i] - nums[i - k]
-        max_sum = max(max_sum, window_sum)
+    for (int i = k; i < nums.size(); i++) {
+        windowSum += nums[i] - nums[i - k];
+        maxSum = max(maxSum, windowSum);
+    }
     
-    return max_sum / k
+    return maxSum / k;
+}
+```
+**Complexity:** Time O(n), Space O(1)
+
+---
+
+### 2. Minimum Recolors to Get K Consecutive Black
+**LeetCode #2379**
+
+Find minimum number of white blocks ('W') to recolor to get k consecutive black blocks ('B').
+
+```
+Input: blocks = "WBBWWBBWBW", k = 7
+Output: 3
+```
+
+**Approach:**
+- Fixed window of size k, count white blocks in each window
+- Track minimum whites across all windows
+
+**Solution:**
+```cpp
+int minimumRecolors(string blocks, int k) {
+    int whites = 0;
+    for (int i = 0; i < k; i++) {
+        if (blocks[i] == 'W') whites++;
+    }
+    int minWhites = whites;
+    
+    for (int i = k; i < blocks.size(); i++) {
+        if (blocks[i] == 'W') whites++;
+        if (blocks[i - k] == 'W') whites--;
+        minWhites = min(minWhites, whites);
+    }
+    
+    return minWhites;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -50,7 +95,7 @@ def findMaxAverage(nums, k):
 
 ## 🟡 Medium Problems
 
-### 2. Longest Substring Without Repeating Characters
+### 3. Longest Substring Without Repeating Characters
 **LeetCode #3**
 
 Find length of longest substring without repeating characters.
@@ -65,26 +110,28 @@ Output: 3 ("abc")
 - When duplicate found, jump start to after previous occurrence
 
 **Solution:**
-```python
-def lengthOfLongestSubstring(s):
-    char_index = {}
-    max_length = 0
-    start = 0
+```cpp
+int lengthOfLongestSubstring(string s) {
+    unordered_map<char, int> charIndex;
+    int maxLength = 0;
+    int start = 0;
     
-    for end in range(len(s)):
-        if s[end] in char_index and char_index[s[end]] >= start:
-            start = char_index[s[end]] + 1
-        
-        char_index[s[end]] = end
-        max_length = max(max_length, end - start + 1)
+    for (int end = 0; end < s.size(); end++) {
+        if (charIndex.count(s[end]) && charIndex[s[end]] >= start) {
+            start = charIndex[s[end]] + 1;
+        }
+        charIndex[s[end]] = end;
+        maxLength = max(maxLength, end - start + 1);
+    }
     
-    return max_length
+    return maxLength;
+}
 ```
 **Complexity:** Time O(n), Space O(min(n, alphabet_size))
 
 ---
 
-### 3. Longest Repeating Character Replacement
+### 4. Longest Repeating Character Replacement
 **LeetCode #424**
 
 Find longest substring with same letter after replacing at most k characters.
@@ -94,36 +141,39 @@ Input: s = "AABABBA", k = 1
 Output: 4 (Replace one 'A' in "AABA" to get "AAAA")
 ```
 
-**Key Insight:**
+**Approach:**
 - Window is valid if: `window_length - max_freq <= k`
 - We can replace all non-majority characters
 
 **Solution:**
-```python
-def characterReplacement(s, k):
-    count = {}
-    max_freq = 0
-    max_length = 0
-    start = 0
+```cpp
+int characterReplacement(string s, int k) {
+    unordered_map<char, int> count;
+    int maxFreq = 0;
+    int maxLength = 0;
+    int start = 0;
     
-    for end in range(len(s)):
-        count[s[end]] = count.get(s[end], 0) + 1
-        max_freq = max(max_freq, count[s[end]])
+    for (int end = 0; end < s.size(); end++) {
+        count[s[end]]++;
+        maxFreq = max(maxFreq, count[s[end]]);
         
-        # Window invalid: more chars to replace than k allows
-        while (end - start + 1) - max_freq > k:
-            count[s[start]] -= 1
-            start += 1
+        // Window invalid: more chars to replace than k allows
+        while ((end - start + 1) - maxFreq > k) {
+            count[s[start]]--;
+            start++;
+        }
         
-        max_length = max(max_length, end - start + 1)
+        maxLength = max(maxLength, end - start + 1);
+    }
     
-    return max_length
+    return maxLength;
+}
 ```
 **Complexity:** Time O(n), Space O(26) = O(1)
 
 ---
 
-### 4. Permutation in String
+### 5. Permutation in String
 **LeetCode #567**
 
 Check if s2 contains any permutation of s1.
@@ -135,42 +185,35 @@ Output: true ("ba" is a permutation of "ab")
 
 **Approach:**
 - Fixed window of size len(s1)
-- Compare character frequencies
+- Compare character frequencies using array
 
 **Solution:**
-```python
-from collections import Counter
-
-def checkInclusion(s1, s2):
-    if len(s1) > len(s2):
-        return False
+```cpp
+bool checkInclusion(string s1, string s2) {
+    if (s1.size() > s2.size()) return false;
     
-    s1_count = Counter(s1)
-    window_count = Counter(s2[:len(s1)])
+    vector<int> s1Count(26, 0), windowCount(26, 0);
+    for (int i = 0; i < s1.size(); i++) {
+        s1Count[s1[i] - 'a']++;
+        windowCount[s2[i] - 'a']++;
+    }
     
-    if s1_count == window_count:
-        return True
+    if (s1Count == windowCount) return true;
     
-    for i in range(len(s1), len(s2)):
-        # Add new char
-        window_count[s2[i]] += 1
-        
-        # Remove old char
-        old_char = s2[i - len(s1)]
-        window_count[old_char] -= 1
-        if window_count[old_char] == 0:
-            del window_count[old_char]
-        
-        if s1_count == window_count:
-            return True
+    for (int i = s1.size(); i < s2.size(); i++) {
+        windowCount[s2[i] - 'a']++;
+        windowCount[s2[i - s1.size()] - 'a']--;
+        if (s1Count == windowCount) return true;
+    }
     
-    return False
+    return false;
+}
 ```
 **Complexity:** Time O(n), Space O(26) = O(1)
 
 ---
 
-### 5. Find All Anagrams in a String
+### 6. Find All Anagrams in a String
 **LeetCode #438**
 
 Find all start indices of p's anagrams in s.
@@ -180,75 +223,78 @@ Input: s = "cbaebabacd", p = "abc"
 Output: [0, 6]
 ```
 
-**Solution:**
-```python
-from collections import Counter
+**Approach:**
+- Same as Permutation in String, but collect all matching indices
 
-def findAnagrams(s, p):
-    if len(p) > len(s):
-        return []
+**Solution:**
+```cpp
+vector<int> findAnagrams(string s, string p) {
+    vector<int> result;
+    if (p.size() > s.size()) return result;
     
-    p_count = Counter(p)
-    window_count = Counter(s[:len(p)])
-    result = []
+    vector<int> pCount(26, 0), windowCount(26, 0);
+    for (int i = 0; i < p.size(); i++) {
+        pCount[p[i] - 'a']++;
+        windowCount[s[i] - 'a']++;
+    }
     
-    if p_count == window_count:
-        result.append(0)
+    if (pCount == windowCount) result.push_back(0);
     
-    for i in range(len(p), len(s)):
-        # Add new char
-        window_count[s[i]] += 1
-        
-        # Remove old char
-        old_char = s[i - len(p)]
-        window_count[old_char] -= 1
-        if window_count[old_char] == 0:
-            del window_count[old_char]
-        
-        if p_count == window_count:
-            result.append(i - len(p) + 1)
+    for (int i = p.size(); i < s.size(); i++) {
+        windowCount[s[i] - 'a']++;
+        windowCount[s[i - p.size()] - 'a']--;
+        if (pCount == windowCount) {
+            result.push_back(i - p.size() + 1);
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(26) = O(1)
 
 ---
 
-### 6. Max Consecutive Ones III
+### 7. Max Consecutive Ones III
 **LeetCode #1004**
 
 Find longest subarray of 1s after flipping at most k 0s.
 
 ```
 Input: nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2
-Output: 6 (Flip 0s at indices 5,10 → [1,1,1,0,0,1,1,1,1,1,1])
+Output: 6
 ```
 
+**Approach:**
+- Variable window tracking count of zeros
+- Shrink when zeros exceed k
+
 **Solution:**
-```python
-def longestOnes(nums, k):
-    start = 0
-    zeros = 0
-    max_length = 0
+```cpp
+int longestOnes(vector<int>& nums, int k) {
+    int start = 0;
+    int zeros = 0;
+    int maxLength = 0;
     
-    for end in range(len(nums)):
-        if nums[end] == 0:
-            zeros += 1
+    for (int end = 0; end < nums.size(); end++) {
+        if (nums[end] == 0) zeros++;
         
-        while zeros > k:
-            if nums[start] == 0:
-                zeros -= 1
-            start += 1
+        while (zeros > k) {
+            if (nums[start] == 0) zeros--;
+            start++;
+        }
         
-        max_length = max(max_length, end - start + 1)
+        maxLength = max(maxLength, end - start + 1);
+    }
     
-    return max_length
+    return maxLength;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
 ---
 
-### 7. Fruit Into Baskets
+### 8. Fruit Into Baskets
 **LeetCode #904**
 
 Find longest subarray with at most 2 distinct elements.
@@ -258,71 +304,81 @@ Input: fruits = [1,2,3,2,2]
 Output: 4 ([2,3,2,2])
 ```
 
+**Approach:**
+- Variable window with map tracking fruit counts
+- Shrink when more than 2 distinct fruits
+
 **Solution:**
-```python
-def totalFruit(fruits):
-    basket = {}
-    start = 0
-    max_fruits = 0
+```cpp
+int totalFruit(vector<int>& fruits) {
+    unordered_map<int, int> basket;
+    int start = 0;
+    int maxFruits = 0;
     
-    for end in range(len(fruits)):
-        basket[fruits[end]] = basket.get(fruits[end], 0) + 1
+    for (int end = 0; end < fruits.size(); end++) {
+        basket[fruits[end]]++;
         
-        while len(basket) > 2:
-            basket[fruits[start]] -= 1
-            if basket[fruits[start]] == 0:
-                del basket[fruits[start]]
-            start += 1
+        while (basket.size() > 2) {
+            basket[fruits[start]]--;
+            if (basket[fruits[start]] == 0) {
+                basket.erase(fruits[start]);
+            }
+            start++;
+        }
         
-        max_fruits = max(max_fruits, end - start + 1)
+        maxFruits = max(maxFruits, end - start + 1);
+    }
     
-    return max_fruits
+    return maxFruits;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
 ---
 
-### 8. Subarray Product Less Than K
+### 9. Subarray Product Less Than K
 **LeetCode #713**
 
 Count subarrays where product of elements < k.
 
 ```
 Input: nums = [10,5,2,6], k = 100
-Output: 8 (Subarrays: [10], [5], [2], [6], [10,5], [5,2], [2,6], [5,2,6])
+Output: 8
 ```
 
-**Key Insight:**
+**Approach:**
 - For each ending position, count new valid subarrays
 - New subarrays ending at `end` = `end - start + 1`
 
 **Solution:**
-```python
-def numSubarrayProductLessThanK(nums, k):
-    if k <= 1:
-        return 0
+```cpp
+int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+    if (k <= 1) return 0;
     
-    product = 1
-    start = 0
-    count = 0
+    int product = 1;
+    int start = 0;
+    int count = 0;
     
-    for end in range(len(nums)):
-        product *= nums[end]
+    for (int end = 0; end < nums.size(); end++) {
+        product *= nums[end];
         
-        while product >= k:
-            product //= nums[start]
-            start += 1
+        while (product >= k) {
+            product /= nums[start];
+            start++;
+        }
         
-        # All subarrays ending at 'end' with start points from 'start' to 'end'
-        count += end - start + 1
+        // All subarrays ending at 'end' with start from 'start' to 'end'
+        count += end - start + 1;
+    }
     
-    return count
+    return count;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
 ---
 
-### 9. Minimum Size Subarray Sum
+### 10. Minimum Size Subarray Sum
 **LeetCode #209**
 
 Find minimal length subarray with sum >= target.
@@ -332,22 +388,28 @@ Input: target = 7, nums = [2,3,1,2,4,3]
 Output: 2 ([4,3])
 ```
 
+**Approach:**
+- Variable window, shrink while sum >= target to find minimum
+
 **Solution:**
-```python
-def minSubArrayLen(target, nums):
-    min_length = float('inf')
-    current_sum = 0
-    start = 0
+```cpp
+int minSubArrayLen(int target, vector<int>& nums) {
+    int minLength = INT_MAX;
+    int currentSum = 0;
+    int start = 0;
     
-    for end in range(len(nums)):
-        current_sum += nums[end]
+    for (int end = 0; end < nums.size(); end++) {
+        currentSum += nums[end];
         
-        while current_sum >= target:
-            min_length = min(min_length, end - start + 1)
-            current_sum -= nums[start]
-            start += 1
+        while (currentSum >= target) {
+            minLength = min(minLength, end - start + 1);
+            currentSum -= nums[start];
+            start++;
+        }
+    }
     
-    return min_length if min_length != float('inf') else 0
+    return minLength == INT_MAX ? 0 : minLength;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -355,7 +417,7 @@ def minSubArrayLen(target, nums):
 
 ## 🔴 Hard Problems
 
-### 10. Minimum Window Substring
+### 11. Minimum Window Substring
 **LeetCode #76**
 
 Find minimum window in s containing all characters of t.
@@ -370,49 +432,49 @@ Output: "BANC"
 - Expand until all required found, then shrink to find minimum
 
 **Solution:**
-```python
-from collections import Counter
-
-def minWindow(s, t):
-    if not t or not s:
-        return ""
+```cpp
+string minWindow(string s, string t) {
+    if (t.empty() || s.empty()) return "";
     
-    t_count = Counter(t)
-    required = len(t_count)
+    unordered_map<char, int> tCount, windowCount;
+    for (char c : t) tCount[c]++;
     
-    formed = 0
-    window_counts = {}
+    int required = tCount.size();
+    int formed = 0;
+    int minLen = INT_MAX, minLeft = 0;
+    int left = 0;
     
-    # (window_length, left, right)
-    ans = float('inf'), None, None
-    
-    left = 0
-    for right in range(len(s)):
-        char = s[right]
-        window_counts[char] = window_counts.get(char, 0) + 1
+    for (int right = 0; right < s.size(); right++) {
+        char c = s[right];
+        windowCount[c]++;
         
-        if char in t_count and window_counts[char] == t_count[char]:
-            formed += 1
+        if (tCount.count(c) && windowCount[c] == tCount[c]) {
+            formed++;
+        }
         
-        while formed == required:
-            # Update answer
-            if right - left + 1 < ans[0]:
-                ans = (right - left + 1, left, right)
+        while (formed == required) {
+            if (right - left + 1 < minLen) {
+                minLen = right - left + 1;
+                minLeft = left;
+            }
             
-            # Shrink window
-            char = s[left]
-            window_counts[char] -= 1
-            if char in t_count and window_counts[char] < t_count[char]:
-                formed -= 1
-            left += 1
+            char leftChar = s[left];
+            windowCount[leftChar]--;
+            if (tCount.count(leftChar) && windowCount[leftChar] < tCount[leftChar]) {
+                formed--;
+            }
+            left++;
+        }
+    }
     
-    return "" if ans[0] == float('inf') else s[ans[1]:ans[2] + 1]
+    return minLen == INT_MAX ? "" : s.substr(minLeft, minLen);
+}
 ```
 **Complexity:** Time O(n + m), Space O(n + m)
 
 ---
 
-### 11. Sliding Window Maximum
+### 12. Sliding Window Maximum
 **LeetCode #239**
 
 Return max element for each window of size k.
@@ -427,38 +489,108 @@ Output: [3,3,5,5,6,7]
 - Deque stores indices in decreasing order of values
 
 **Solution:**
-```python
-from collections import deque
-
-def maxSlidingWindow(nums, k):
-    dq = deque()  # Store indices
-    result = []
+```cpp
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    deque<int> dq;  // Store indices
+    vector<int> result;
     
-    for i in range(len(nums)):
-        # Remove indices outside window
-        while dq and dq[0] < i - k + 1:
-            dq.popleft()
+    for (int i = 0; i < nums.size(); i++) {
+        // Remove indices outside window
+        while (!dq.empty() && dq.front() < i - k + 1) {
+            dq.pop_front();
+        }
         
-        # Remove smaller elements (maintain decreasing order)
-        while dq and nums[dq[-1]] < nums[i]:
-            dq.pop()
+        // Remove smaller elements (maintain decreasing order)
+        while (!dq.empty() && nums[dq.back()] < nums[i]) {
+            dq.pop_back();
+        }
         
-        dq.append(i)
+        dq.push_back(i);
         
-        # Start adding to result when first window is complete
-        if i >= k - 1:
-            result.append(nums[dq[0]])
+        // Start adding to result when first window is complete
+        if (i >= k - 1) {
+            result.push_back(nums[dq.front()]);
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(k)
+
+---
+
+### 13. Substring with Concatenation of All Words
+**LeetCode #30**
+
+Find all starting indices of substrings that are concatenation of all words.
+
+```
+Input: s = "barfoothefoobarman", words = ["foo","bar"]
+Output: [0,9]
+```
+
+**Approach:**
+- Fixed window of size words.size() * word_length
+- Check all starting positions within one word length
+
+**Solution:**
+```cpp
+vector<int> findSubstring(string s, vector<string>& words) {
+    vector<int> result;
+    if (s.empty() || words.empty()) return result;
+    
+    int wordLen = words[0].size();
+    int wordCount = words.size();
+    int totalLen = wordLen * wordCount;
+    
+    if (s.size() < totalLen) return result;
+    
+    unordered_map<string, int> wordMap;
+    for (const string& word : words) {
+        wordMap[word]++;
+    }
+    
+    for (int i = 0; i < wordLen; i++) {
+        int left = i, count = 0;
+        unordered_map<string, int> seen;
+        
+        for (int j = i; j + wordLen <= s.size(); j += wordLen) {
+            string word = s.substr(j, wordLen);
+            
+            if (wordMap.count(word)) {
+                seen[word]++;
+                count++;
+                
+                while (seen[word] > wordMap[word]) {
+                    string leftWord = s.substr(left, wordLen);
+                    seen[leftWord]--;
+                    count--;
+                    left += wordLen;
+                }
+                
+                if (count == wordCount) {
+                    result.push_back(left);
+                }
+            } else {
+                seen.clear();
+                count = 0;
+                left = j + wordLen;
+            }
+        }
+    }
+    
+    return result;
+}
+```
+**Complexity:** Time O(n * wordLen), Space O(m) where m = number of words
 
 ---
 
 ## 📚 Study Tips for Sliding Window
 
 1. **Fixed vs Variable:** Know when to use each type
-2. **Window State:** Choose the right data structure (Counter, set, deque)
+2. **Window State:** Choose the right data structure (map, set, deque)
 3. **Shrink Condition:** Max problems shrink when invalid, min problems shrink while valid
 4. **Count vs Index:** Decide whether to track frequency or last index
 

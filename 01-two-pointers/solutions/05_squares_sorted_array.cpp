@@ -26,8 +26,23 @@ using namespace std;
 // ============================================================================
 vector<int> sortedSquares(vector<int>& nums) {
     // Your implementation here
-    
-    return {};
+    int l = 0;
+    int r = nums.size()-1;
+    int k = nums.size()-1;
+    std::vector<int> res(nums.size(), 0);
+    while(l <= r) {
+        int l2 = nums[l]*nums[l];
+        int r2 = nums[r]*nums[r];
+        if (l2 > r2) {
+            res[k] = l2;
+            l++;
+        } else {
+            res[k] = r2;
+            r--;
+        }
+        k--;
+    }
+    return res;
 }
 
 // ============================================================================

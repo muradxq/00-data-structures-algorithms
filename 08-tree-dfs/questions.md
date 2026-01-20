@@ -34,18 +34,22 @@ Input:     3
 Output: 3
 ```
 
+**Approach:**
+- Recursively find max depth of left and right subtrees
+- Add 1 for current node
+
 **Solution:**
-```python
-def maxDepth(root):
-    if not root:
-        return 0
+```cpp
+int maxDepth(TreeNode* root) {
+    if (!root) return 0;
     
-    left_depth = maxDepth(root.left)
-    right_depth = maxDepth(root.right)
+    int leftDepth = maxDepth(root->left);
+    int rightDepth = maxDepth(root->right);
     
-    return 1 + max(left_depth, right_depth)
+    return 1 + max(leftDepth, rightDepth);
+}
 ```
-**Complexity:** Time O(n), Space O(h)
+**Complexity:** Time O(n), Space O(h) where h is tree height
 
 ---
 
@@ -54,17 +58,23 @@ def maxDepth(root):
 
 Check if two trees are identical.
 
+```
+Input: p = [1,2,3], q = [1,2,3]
+Output: true
+```
+
+**Approach:**
+- Compare root values, then recursively compare subtrees
+
 **Solution:**
-```python
-def isSameTree(p, q):
-    if not p and not q:
-        return True
-    if not p or not q:
-        return False
-    if p.val != q.val:
-        return False
+```cpp
+bool isSameTree(TreeNode* p, TreeNode* q) {
+    if (!p && !q) return true;
+    if (!p || !q) return false;
+    if (p->val != q->val) return false;
     
-    return isSameTree(p.left, q.left) and isSameTree(p.right, q.right)
+    return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
@@ -83,20 +93,24 @@ Input:     4           Output:     4
        1  3 6  9               9  6 3  1
 ```
 
+**Approach:**
+- Swap left and right children
+- Recursively invert subtrees
+
 **Solution:**
-```python
-def invertTree(root):
-    if not root:
-        return None
+```cpp
+TreeNode* invertTree(TreeNode* root) {
+    if (!root) return nullptr;
     
-    # Swap children
-    root.left, root.right = root.right, root.left
+    // Swap children
+    swap(root->left, root->right);
     
-    # Recurse
-    invertTree(root.left)
-    invertTree(root.right)
+    // Recurse
+    invertTree(root->left);
+    invertTree(root->right);
     
-    return root
+    return root;
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
@@ -107,19 +121,29 @@ def invertTree(root):
 
 Check if root-to-leaf path with target sum exists.
 
+```
+Input: root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+Output: true (5→4→11→2)
+```
+
+**Approach:**
+- Subtract current value from target
+- At leaf, check if remaining target is 0
+
 **Solution:**
-```python
-def hasPathSum(root, targetSum):
-    if not root:
-        return False
+```cpp
+bool hasPathSum(TreeNode* root, int targetSum) {
+    if (!root) return false;
     
-    targetSum -= root.val
+    targetSum -= root->val;
     
-    # Leaf node check
-    if not root.left and not root.right:
-        return targetSum == 0
+    // Leaf node check
+    if (!root->left && !root->right) {
+        return targetSum == 0;
+    }
     
-    return hasPathSum(root.left, targetSum) or hasPathSum(root.right, targetSum)
+    return hasPathSum(root->left, targetSum) || hasPathSum(root->right, targetSum);
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
@@ -143,28 +167,36 @@ Input:     5         targetSum = 22
 Output: [[5,4,11,2], [5,8,4,5]]
 ```
 
+**Approach:**
+- Track current path
+- When leaf with correct sum found, add path to result
+- Backtrack after exploring
+
 **Solution:**
-```python
-def pathSum(root, targetSum):
-    result = []
+```cpp
+vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+    vector<vector<int>> result;
+    vector<int> path;
     
-    def dfs(node, target, path):
-        if not node:
-            return
+    function<void(TreeNode*, int)> dfs = [&](TreeNode* node, int target) {
+        if (!node) return;
         
-        path.append(node.val)
-        target -= node.val
+        path.push_back(node->val);
+        target -= node->val;
         
-        if not node.left and not node.right and target == 0:
-            result.append(list(path))
+        if (!node->left && !node->right && target == 0) {
+            result.push_back(path);
+        }
         
-        dfs(node.left, target, path)
-        dfs(node.right, target, path)
+        dfs(node->left, target);
+        dfs(node->right, target);
         
-        path.pop()  # Backtrack
+        path.pop_back();  // Backtrack
+    };
     
-    dfs(root, targetSum, [])
-    return result
+    dfs(root, targetSum);
+    return result;
+}
 ```
 **Complexity:** Time O(n²), Space O(n)
 
@@ -183,22 +215,28 @@ Numbers: 12, 13
 Output: 25
 ```
 
+**Approach:**
+- Pass current number down (multiply by 10 and add current value)
+- At leaf, return the number
+
 **Solution:**
-```python
-def sumNumbers(root):
-    def dfs(node, current_num):
-        if not node:
-            return 0
+```cpp
+int sumNumbers(TreeNode* root) {
+    function<int(TreeNode*, int)> dfs = [&](TreeNode* node, int currentNum) -> int {
+        if (!node) return 0;
         
-        current_num = current_num * 10 + node.val
+        currentNum = currentNum * 10 + node->val;
         
-        # Leaf node
-        if not node.left and not node.right:
-            return current_num
+        // Leaf node
+        if (!node->left && !node->right) {
+            return currentNum;
+        }
         
-        return dfs(node.left, current_num) + dfs(node.right, current_num)
+        return dfs(node->left, currentNum) + dfs(node->right, currentNum);
+    };
     
-    return dfs(root, 0)
+    return dfs(root, 0);
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
@@ -218,96 +256,36 @@ Input:     1
 Output: 3 (path: 4-2-1-3 or 5-2-1-3)
 ```
 
-**Key Insight:** Diameter through a node = left_height + right_height
+**Approach:**
+- Diameter through a node = left_height + right_height
+- Track global maximum while computing heights
 
 **Solution:**
-```python
-def diameterOfBinaryTree(root):
-    diameter = 0
+```cpp
+int diameterOfBinaryTree(TreeNode* root) {
+    int diameter = 0;
     
-    def height(node):
-        nonlocal diameter
-        if not node:
-            return 0
+    function<int(TreeNode*)> height = [&](TreeNode* node) -> int {
+        if (!node) return 0;
         
-        left_h = height(node.left)
-        right_h = height(node.right)
+        int leftH = height(node->left);
+        int rightH = height(node->right);
         
-        # Update diameter
-        diameter = max(diameter, left_h + right_h)
+        // Update diameter
+        diameter = max(diameter, leftH + rightH);
         
-        return 1 + max(left_h, right_h)
+        return 1 + max(leftH, rightH);
+    };
     
-    height(root)
-    return diameter
+    height(root);
+    return diameter;
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
 ---
 
-### 8. Lowest Common Ancestor of BST
-**LeetCode #235**
-
-Find LCA of two nodes in BST.
-
-**Solution:**
-```python
-def lowestCommonAncestor(root, p, q):
-    while root:
-        if p.val < root.val and q.val < root.val:
-            root = root.left
-        elif p.val > root.val and q.val > root.val:
-            root = root.right
-        else:
-            return root
-    return None
-```
-
-**For regular Binary Tree (LeetCode #236):**
-```python
-def lowestCommonAncestor(root, p, q):
-    if not root or root == p or root == q:
-        return root
-    
-    left = lowestCommonAncestor(root.left, p, q)
-    right = lowestCommonAncestor(root.right, p, q)
-    
-    if left and right:
-        return root  # p and q are in different subtrees
-    
-    return left if left else right
-```
-**Complexity:** Time O(n), Space O(h)
-
----
-
-### 9. Validate Binary Search Tree
-**LeetCode #98**
-
-Check if tree is valid BST.
-
-**Solution:**
-```python
-def isValidBST(root):
-    def validate(node, min_val, max_val):
-        if not node:
-            return True
-        
-        if node.val <= min_val or node.val >= max_val:
-            return False
-        
-        return (validate(node.left, min_val, node.val) and
-                validate(node.right, node.val, max_val))
-    
-    return validate(root, float('-inf'), float('inf'))
-```
-**Complexity:** Time O(n), Space O(h)
-
----
-
-## 🔴 Hard Problems
-
-### 10. Binary Tree Maximum Path Sum
+### 8. Binary Tree Maximum Path Sum
 **LeetCode #124**
 
 Find max path sum (path can start and end at any node).
@@ -321,69 +299,156 @@ Input:     -10
 Output: 42 (path: 15-20-7)
 ```
 
+**Approach:**
+- For each node, compute max path through it
+- Track global maximum
+- Return max single-branch gain for parent computation
+
 **Solution:**
-```python
-def maxPathSum(root):
-    max_sum = float('-inf')
+```cpp
+int maxPathSum(TreeNode* root) {
+    int maxSum = INT_MIN;
     
-    def max_gain(node):
-        nonlocal max_sum
-        if not node:
-            return 0
+    function<int(TreeNode*)> maxGain = [&](TreeNode* node) -> int {
+        if (!node) return 0;
         
-        # Max gain from left/right (ignore negative)
-        left_gain = max(max_gain(node.left), 0)
-        right_gain = max(max_gain(node.right), 0)
+        // Max gain from left/right (ignore negative)
+        int leftGain = max(maxGain(node->left), 0);
+        int rightGain = max(maxGain(node->right), 0);
         
-        # Path through current node
-        current_path = node.val + left_gain + right_gain
-        max_sum = max(max_sum, current_path)
+        // Path through current node
+        int currentPath = node->val + leftGain + rightGain;
+        maxSum = max(maxSum, currentPath);
         
-        # Return max gain if continuing through this node
-        return node.val + max(left_gain, right_gain)
+        // Return max gain if continuing through this node
+        return node->val + max(leftGain, rightGain);
+    };
     
-    max_gain(root)
-    return max_sum
+    maxGain(root);
+    return maxSum;
+}
 ```
 **Complexity:** Time O(n), Space O(h)
 
 ---
+
+### 9. Lowest Common Ancestor
+**LeetCode #235** (BST) / **#236** (Binary Tree)
+
+Find LCA of two nodes.
+
+**BST Solution:**
+```cpp
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    while (root) {
+        if (p->val < root->val && q->val < root->val) {
+            root = root->left;
+        } else if (p->val > root->val && q->val > root->val) {
+            root = root->right;
+        } else {
+            return root;
+        }
+    }
+    return nullptr;
+}
+```
+
+**Binary Tree Solution:**
+```cpp
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (!root || root == p || root == q) return root;
+    
+    TreeNode* left = lowestCommonAncestor(root->left, p, q);
+    TreeNode* right = lowestCommonAncestor(root->right, p, q);
+    
+    if (left && right) return root;  // p and q in different subtrees
+    
+    return left ? left : right;
+}
+```
+**Complexity:** Time O(n), Space O(h)
+
+---
+
+### 10. Validate Binary Search Tree
+**LeetCode #98**
+
+Check if tree is valid BST.
+
+**Approach:**
+- Pass valid range (min, max) for each node
+- Each node must be within its valid range
+
+**Solution:**
+```cpp
+bool isValidBST(TreeNode* root) {
+    function<bool(TreeNode*, long, long)> validate = [&](TreeNode* node, long minVal, long maxVal) -> bool {
+        if (!node) return true;
+        
+        if (node->val <= minVal || node->val >= maxVal) {
+            return false;
+        }
+        
+        return validate(node->left, minVal, node->val) &&
+               validate(node->right, node->val, maxVal);
+    };
+    
+    return validate(root, LONG_MIN, LONG_MAX);
+}
+```
+**Complexity:** Time O(n), Space O(h)
+
+---
+
+## 🔴 Hard Problems
 
 ### 11. Serialize and Deserialize Binary Tree
 **LeetCode #297**
 
 Convert tree to string and back.
 
+**Approach:**
+- Preorder traversal with null markers
+- Use delimiter to separate values
+
 **Solution:**
-```python
-class Codec:
-    def serialize(self, root):
-        result = []
-        
-        def dfs(node):
-            if not node:
-                result.append('null')
-                return
-            result.append(str(node.val))
-            dfs(node.left)
-            dfs(node.right)
-        
-        dfs(root)
-        return ','.join(result)
+```cpp
+class Codec {
+public:
+    string serialize(TreeNode* root) {
+        string result;
+        serializeHelper(root, result);
+        return result;
+    }
     
-    def deserialize(self, data):
-        values = iter(data.split(','))
+    TreeNode* deserialize(string data) {
+        istringstream iss(data);
+        return deserializeHelper(iss);
+    }
+    
+private:
+    void serializeHelper(TreeNode* node, string& result) {
+        if (!node) {
+            result += "null,";
+            return;
+        }
+        result += to_string(node->val) + ",";
+        serializeHelper(node->left, result);
+        serializeHelper(node->right, result);
+    }
+    
+    TreeNode* deserializeHelper(istringstream& iss) {
+        string val;
+        getline(iss, val, ',');
         
-        def dfs():
-            val = next(values)
-            if val == 'null':
-                return None
-            node = TreeNode(int(val))
-            node.left = dfs()
-            node.right = dfs()
-            return node
+        if (val == "null") return nullptr;
         
-        return dfs()
+        TreeNode* node = new TreeNode(stoi(val));
+        node->left = deserializeHelper(iss);
+        node->right = deserializeHelper(iss);
+        return node;
+    }
+};
 ```
 **Complexity:** Time O(n), Space O(n)
 

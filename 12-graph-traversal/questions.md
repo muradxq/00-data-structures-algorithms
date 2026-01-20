@@ -32,31 +32,41 @@ Input: grid = [
 Output: 3
 ```
 
+**Approach:**
+- DFS/BFS from each unvisited '1'
+- Mark visited cells to avoid counting twice
+- Each DFS/BFS explores one complete island
+
 **DFS Solution:**
-```python
-def numIslands(grid):
-    if not grid:
-        return 0
+```cpp
+int numIslands(vector<vector<char>>& grid) {
+    if (grid.empty()) return 0;
     
-    rows, cols = len(grid), len(grid[0])
-    count = 0
+    int rows = grid.size(), cols = grid[0].size();
+    int count = 0;
     
-    def dfs(r, c):
-        if r < 0 or r >= rows or c < 0 or c >= cols or grid[r][c] != '1':
-            return
-        grid[r][c] = '0'
-        dfs(r+1, c)
-        dfs(r-1, c)
-        dfs(r, c+1)
-        dfs(r, c-1)
+    function<void(int, int)> dfs = [&](int r, int c) {
+        if (r < 0 || r >= rows || c < 0 || c >= cols || grid[r][c] != '1') {
+            return;
+        }
+        grid[r][c] = '0';  // Mark visited
+        dfs(r + 1, c);
+        dfs(r - 1, c);
+        dfs(r, c + 1);
+        dfs(r, c - 1);
+    };
     
-    for r in range(rows):
-        for c in range(cols):
-            if grid[r][c] == '1':
-                count += 1
-                dfs(r, c)
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (grid[r][c] == '1') {
+                count++;
+                dfs(r, c);
+            }
+        }
+    }
     
-    return count
+    return count;
+}
 ```
 **Complexity:** Time O(m×n), Space O(m×n)
 
@@ -67,33 +77,108 @@ def numIslands(grid):
 
 Return deep copy of graph.
 
+```
+Input: adjList = [[2,4],[1,3],[2,4],[1,3]]
+Output: Deep copy of the graph
+```
+
+**Approach:**
+- Use hashmap to track cloned nodes
+- DFS to clone each node and its neighbors
+
 **Solution:**
-```python
-def cloneGraph(node):
-    if not node:
-        return None
+```cpp
+Node* cloneGraph(Node* node) {
+    if (!node) return nullptr;
     
-    clones = {}
+    unordered_map<Node*, Node*> clones;
     
-    def dfs(node):
-        if node in clones:
-            return clones[node]
+    function<Node*(Node*)> dfs = [&](Node* node) -> Node* {
+        if (clones.count(node)) {
+            return clones[node];
+        }
         
-        clone = Node(node.val)
-        clones[node] = clone
+        Node* clone = new Node(node->val);
+        clones[node] = clone;
         
-        for neighbor in node.neighbors:
-            clone.neighbors.append(dfs(neighbor))
+        for (Node* neighbor : node->neighbors) {
+            clone->neighbors.push_back(dfs(neighbor));
+        }
         
-        return clone
+        return clone;
+    };
     
-    return dfs(node)
+    return dfs(node);
+}
 ```
 **Complexity:** Time O(V+E), Space O(V)
 
 ---
 
-### 3. Rotting Oranges
+### 3. Pacific Atlantic Water Flow
+**LeetCode #417**
+
+Find cells that can flow to both Pacific and Atlantic oceans.
+
+```
+Input: heights = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]
+Output: [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]
+```
+
+**Approach:**
+- DFS from ocean borders (reverse water flow)
+- Find intersection of cells reachable from both oceans
+
+**Solution:**
+```cpp
+vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
+    if (heights.empty()) return {};
+    
+    int rows = heights.size(), cols = heights[0].size();
+    vector<vector<bool>> pacific(rows, vector<bool>(cols, false));
+    vector<vector<bool>> atlantic(rows, vector<bool>(cols, false));
+    
+    function<void(int, int, vector<vector<bool>>&, int)> dfs = 
+        [&](int r, int c, vector<vector<bool>>& visited, int prevHeight) {
+        if (r < 0 || r >= rows || c < 0 || c >= cols ||
+            visited[r][c] || heights[r][c] < prevHeight) {
+            return;
+        }
+        
+        visited[r][c] = true;
+        dfs(r + 1, c, visited, heights[r][c]);
+        dfs(r - 1, c, visited, heights[r][c]);
+        dfs(r, c + 1, visited, heights[r][c]);
+        dfs(r, c - 1, visited, heights[r][c]);
+    };
+    
+    // Start from ocean borders
+    for (int c = 0; c < cols; c++) {
+        dfs(0, c, pacific, 0);          // Pacific top
+        dfs(rows - 1, c, atlantic, 0);  // Atlantic bottom
+    }
+    for (int r = 0; r < rows; r++) {
+        dfs(r, 0, pacific, 0);          // Pacific left
+        dfs(r, cols - 1, atlantic, 0);  // Atlantic right
+    }
+    
+    vector<vector<int>> result;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (pacific[r][c] && atlantic[r][c]) {
+                result.push_back({r, c});
+            }
+        }
+    }
+    
+    return result;
+}
+```
+**Complexity:** Time O(m×n), Space O(m×n)
+
+---
+
+### 4. Rotting Oranges
 **LeetCode #994**
 
 Find minimum minutes for all oranges to rot (multi-source BFS).
@@ -103,89 +188,60 @@ Input: grid = [[2,1,1],[1,1,0],[0,1,1]]
 Output: 4
 ```
 
-**Solution:**
-```python
-from collections import deque
-
-def orangesRotting(grid):
-    rows, cols = len(grid), len(grid[0])
-    queue = deque()
-    fresh = 0
-    
-    # Find all rotten oranges and count fresh
-    for r in range(rows):
-        for c in range(cols):
-            if grid[r][c] == 2:
-                queue.append((r, c))
-            elif grid[r][c] == 1:
-                fresh += 1
-    
-    if fresh == 0:
-        return 0
-    
-    minutes = 0
-    directions = [(0,1), (0,-1), (1,0), (-1,0)]
-    
-    while queue:
-        minutes += 1
-        for _ in range(len(queue)):
-            r, c = queue.popleft()
-            
-            for dr, dc in directions:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:
-                    grid[nr][nc] = 2
-                    fresh -= 1
-                    queue.append((nr, nc))
-    
-    return minutes - 1 if fresh == 0 else -1
-```
-**Complexity:** Time O(m×n), Space O(m×n)
-
----
-
-### 4. Pacific Atlantic Water Flow
-**LeetCode #417**
-
-Find cells that can flow to both Pacific and Atlantic oceans.
+**Approach:**
+- Multi-source BFS starting from all rotten oranges
+- Track minutes level by level
 
 **Solution:**
-```python
-def pacificAtlantic(heights):
-    if not heights:
-        return []
+```cpp
+int orangesRotting(vector<vector<int>>& grid) {
+    int rows = grid.size(), cols = grid[0].size();
+    queue<pair<int, int>> q;
+    int fresh = 0;
     
-    rows, cols = len(heights), len(heights[0])
-    pacific = set()
-    atlantic = set()
+    // Find all rotten oranges and count fresh
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (grid[r][c] == 2) {
+                q.push({r, c});
+            } else if (grid[r][c] == 1) {
+                fresh++;
+            }
+        }
+    }
     
-    def dfs(r, c, visited, prev_height):
-        if (r < 0 or r >= rows or c < 0 or c >= cols or
-            (r, c) in visited or heights[r][c] < prev_height):
-            return
+    if (fresh == 0) return 0;
+    
+    int minutes = 0;
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    
+    while (!q.empty()) {
+        minutes++;
+        int size = q.size();
         
-        visited.add((r, c))
-        dfs(r+1, c, visited, heights[r][c])
-        dfs(r-1, c, visited, heights[r][c])
-        dfs(r, c+1, visited, heights[r][c])
-        dfs(r, c-1, visited, heights[r][c])
+        for (int i = 0; i < size; i++) {
+            auto [r, c] = q.front();
+            q.pop();
+            
+            for (auto [dr, dc] : directions) {
+                int nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] == 1) {
+                    grid[nr][nc] = 2;
+                    fresh--;
+                    q.push({nr, nc});
+                }
+            }
+        }
+    }
     
-    # Start from ocean borders
-    for c in range(cols):
-        dfs(0, c, pacific, 0)        # Pacific top
-        dfs(rows-1, c, atlantic, 0)  # Atlantic bottom
-    
-    for r in range(rows):
-        dfs(r, 0, pacific, 0)        # Pacific left
-        dfs(r, cols-1, atlantic, 0)  # Atlantic right
-    
-    return list(pacific & atlantic)
+    return fresh == 0 ? minutes - 1 : -1;
+}
 ```
 **Complexity:** Time O(m×n), Space O(m×n)
 
 ---
 
-### 5. Course Schedule
+### 6. Course Schedule
 **LeetCode #207**
 
 Can finish all courses given prerequisites? (Cycle detection)
@@ -195,34 +251,137 @@ Input: numCourses = 2, prerequisites = [[1,0]]
 Output: true (Take course 0, then course 1)
 ```
 
+**Approach:**
+- Build adjacency list
+- DFS with state tracking: 0=unvisited, 1=visiting, 2=visited
+- Cycle exists if we reach a "visiting" node
+
 **Solution:**
-```python
-def canFinish(numCourses, prerequisites):
-    graph = [[] for _ in range(numCourses)]
-    for course, prereq in prerequisites:
-        graph[course].append(prereq)
+```cpp
+bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+    vector<vector<int>> graph(numCourses);
+    for (auto& prereq : prerequisites) {
+        graph[prereq[0]].push_back(prereq[1]);
+    }
     
-    # 0: unvisited, 1: visiting, 2: visited
-    state = [0] * numCourses
+    // 0: unvisited, 1: visiting, 2: visited
+    vector<int> state(numCourses, 0);
     
-    def has_cycle(course):
-        if state[course] == 1:  # Currently visiting = cycle
-            return True
-        if state[course] == 2:  # Already done
-            return False
+    function<bool(int)> hasCycle = [&](int course) -> bool {
+        if (state[course] == 1) return true;   // Cycle
+        if (state[course] == 2) return false;  // Already done
         
-        state[course] = 1
-        for prereq in graph[course]:
-            if has_cycle(prereq):
-                return True
-        state[course] = 2
-        return False
+        state[course] = 1;
+        for (int prereq : graph[course]) {
+            if (hasCycle(prereq)) return true;
+        }
+        state[course] = 2;
+        return false;
+    };
     
-    for course in range(numCourses):
-        if has_cycle(course):
-            return False
+    for (int course = 0; course < numCourses; course++) {
+        if (hasCycle(course)) return false;
+    }
     
-    return True
+    return true;
+}
+```
+**Complexity:** Time O(V+E), Space O(V+E)
+
+---
+
+### 7. Graph Valid Tree
+**LeetCode #261** (Premium)
+
+Check if edges form a valid tree (connected, no cycles).
+
+```
+Input: n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]
+Output: true
+```
+
+**Approach:**
+- Tree has exactly n-1 edges
+- Must be connected (all nodes reachable from any node)
+- No cycles
+
+**Solution:**
+```cpp
+bool validTree(int n, vector<vector<int>>& edges) {
+    if (edges.size() != n - 1) return false;  // Tree has n-1 edges
+    
+    vector<vector<int>> graph(n);
+    for (auto& edge : edges) {
+        graph[edge[0]].push_back(edge[1]);
+        graph[edge[1]].push_back(edge[0]);
+    }
+    
+    vector<bool> visited(n, false);
+    queue<int> q;
+    q.push(0);
+    visited[0] = true;
+    int count = 0;
+    
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+        count++;
+        
+        for (int neighbor : graph[node]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+        }
+    }
+    
+    return count == n;  // All nodes reachable
+}
+```
+**Complexity:** Time O(V+E), Space O(V+E)
+
+---
+
+### 8. Number of Connected Components
+**LeetCode #323** (Premium)
+
+Count connected components in undirected graph.
+
+```
+Input: n = 5, edges = [[0,1],[1,2],[3,4]]
+Output: 2
+```
+
+**Solution:**
+```cpp
+int countComponents(int n, vector<vector<int>>& edges) {
+    vector<vector<int>> graph(n);
+    for (auto& edge : edges) {
+        graph[edge[0]].push_back(edge[1]);
+        graph[edge[1]].push_back(edge[0]);
+    }
+    
+    vector<bool> visited(n, false);
+    int count = 0;
+    
+    function<void(int)> dfs = [&](int node) {
+        visited[node] = true;
+        for (int neighbor : graph[node]) {
+            if (!visited[neighbor]) {
+                dfs(neighbor);
+            }
+        }
+    };
+    
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            count++;
+            dfs(i);
+        }
+    }
+    
+    return count;
+}
 ```
 **Complexity:** Time O(V+E), Space O(V+E)
 
@@ -230,7 +389,7 @@ def canFinish(numCourses, prerequisites):
 
 ## 🔴 Hard Problems
 
-### 6. Word Ladder
+### 5. Word Ladder
 **LeetCode #127**
 
 Find shortest transformation from beginWord to endWord.
@@ -241,33 +400,42 @@ Input: beginWord = "hit", endWord = "cog",
 Output: 5 ("hit" -> "hot" -> "dot" -> "dog" -> "cog")
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- BFS for shortest path
+- Try all possible single-character changes at each step
 
-def ladderLength(beginWord, endWord, wordList):
-    word_set = set(wordList)
-    if endWord not in word_set:
-        return 0
+**Solution:**
+```cpp
+int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+    unordered_set<string> wordSet(wordList.begin(), wordList.end());
+    if (!wordSet.count(endWord)) return 0;
     
-    queue = deque([(beginWord, 1)])
-    visited = {beginWord}
+    queue<pair<string, int>> q;
+    q.push({beginWord, 1});
+    unordered_set<string> visited;
+    visited.insert(beginWord);
     
-    while queue:
-        word, length = queue.popleft()
+    while (!q.empty()) {
+        auto [word, length] = q.front();
+        q.pop();
         
-        for i in range(len(word)):
-            for c in 'abcdefghijklmnopqrstuvwxyz':
-                next_word = word[:i] + c + word[i+1:]
+        for (int i = 0; i < word.size(); i++) {
+            string next = word;
+            for (char c = 'a'; c <= 'z'; c++) {
+                next[i] = c;
                 
-                if next_word == endWord:
-                    return length + 1
+                if (next == endWord) return length + 1;
                 
-                if next_word in word_set and next_word not in visited:
-                    visited.add(next_word)
-                    queue.append((next_word, length + 1))
+                if (wordSet.count(next) && !visited.count(next)) {
+                    visited.insert(next);
+                    q.push({next, length + 1});
+                }
+            }
+        }
+    }
     
-    return 0
+    return 0;
+}
 ```
 **Complexity:** Time O(m² × n), Space O(m × n) where m = word length, n = word count
 

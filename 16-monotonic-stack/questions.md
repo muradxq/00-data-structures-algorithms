@@ -15,7 +15,7 @@
 
 ## 🟢 Easy Problems
 
-### 1. Next Greater Element I
+### 2. Next Greater Element I
 **LeetCode #496**
 
 Find next greater element from nums2 for each element in nums1.
@@ -25,18 +25,30 @@ Input: nums1 = [4,1,2], nums2 = [1,3,4,2]
 Output: [-1,3,-1]
 ```
 
+**Approach:**
+- Precompute next greater for all elements in nums2
+- Monotonic decreasing stack - pop when finding greater element
+
 **Solution:**
-```python
-def nextGreaterElement(nums1, nums2):
-    next_greater = {}
-    stack = []
+```cpp
+vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {
+    unordered_map<int, int> nextGreater;
+    stack<int> st;
     
-    for num in nums2:
-        while stack and num > stack[-1]:
-            next_greater[stack.pop()] = num
-        stack.append(num)
+    for (int num : nums2) {
+        while (!st.empty() && num > st.top()) {
+            nextGreater[st.top()] = num;
+            st.pop();
+        }
+        st.push(num);
+    }
     
-    return [next_greater.get(num, -1) for num in nums1]
+    vector<int> result;
+    for (int num : nums1) {
+        result.push_back(nextGreater.count(num) ? nextGreater[num] : -1);
+    }
+    return result;
+}
 ```
 **Complexity:** Time O(m + n), Space O(n)
 
@@ -44,7 +56,7 @@ def nextGreaterElement(nums1, nums2):
 
 ## 🟡 Medium Problems
 
-### 2. Daily Temperatures
+### 1. Daily Temperatures
 **LeetCode #739**
 
 Days until warmer temperature.
@@ -54,20 +66,28 @@ Input: temperatures = [73,74,75,71,69,72,76,73]
 Output: [1,1,4,2,1,1,0,0]
 ```
 
+**Approach:**
+- Stack stores indices of temperatures waiting for warmer day
+- When finding warmer temp, pop and calculate days difference
+
 **Solution:**
-```python
-def dailyTemperatures(temperatures):
-    n = len(temperatures)
-    result = [0] * n
-    stack = []
+```cpp
+vector<int> dailyTemperatures(vector<int>& temperatures) {
+    int n = temperatures.size();
+    vector<int> result(n, 0);
+    stack<int> st;
     
-    for i in range(n):
-        while stack and temperatures[i] > temperatures[stack[-1]]:
-            idx = stack.pop()
-            result[idx] = i - idx
-        stack.append(i)
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && temperatures[i] > temperatures[st.top()]) {
+            int idx = st.top();
+            st.pop();
+            result[idx] = i - idx;
+        }
+        st.push(i);
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -83,44 +103,61 @@ Input: nums = [1,2,1]
 Output: [2,-1,2]
 ```
 
+**Approach:**
+- Process array twice to handle circular nature
+- Only add to stack on first pass
+
 **Solution:**
-```python
-def nextGreaterElements(nums):
-    n = len(nums)
-    result = [-1] * n
-    stack = []
+```cpp
+vector<int> nextGreaterElements(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> result(n, -1);
+    stack<int> st;
     
-    # Process twice for circular
-    for i in range(2 * n):
-        idx = i % n
-        while stack and nums[idx] > nums[stack[-1]]:
-            result[stack.pop()] = nums[idx]
-        if i < n:
-            stack.append(i)
+    // Process twice for circular
+    for (int i = 0; i < 2 * n; i++) {
+        int idx = i % n;
+        while (!st.empty() && nums[idx] > nums[st.top()]) {
+            result[st.top()] = nums[idx];
+            st.pop();
+        }
+        if (i < n) {
+            st.push(i);
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
 ---
 
-### 4. Online Stock Span
+### 6. Online Stock Span
 **LeetCode #901**
 
 Find span of stock prices (consecutive days with price ≤ today).
 
+**Approach:**
+- Stack stores pairs of (price, span)
+- Combine spans when current price is higher
+
 **Solution:**
-```python
-class StockSpanner:
-    def __init__(self):
-        self.stack = []  # (price, span)
+```cpp
+class StockSpanner {
+    stack<pair<int, int>> st;  // {price, span}
     
-    def next(self, price):
-        span = 1
-        while self.stack and self.stack[-1][0] <= price:
-            span += self.stack.pop()[1]
-        self.stack.append((price, span))
-        return span
+public:
+    int next(int price) {
+        int span = 1;
+        while (!st.empty() && st.top().first <= price) {
+            span += st.top().second;
+            st.pop();
+        }
+        st.push({price, span});
+        return span;
+    }
+};
 ```
 **Complexity:** O(1) amortized per call
 
@@ -128,7 +165,7 @@ class StockSpanner:
 
 ## 🔴 Hard Problems
 
-### 5. Largest Rectangle in Histogram
+### 4. Largest Rectangle in Histogram
 **LeetCode #84**
 
 Find largest rectangle area in histogram.
@@ -138,23 +175,75 @@ Input: heights = [2,1,5,6,2,3]
 Output: 10
 ```
 
+**Approach:**
+- Stack stores indices of increasing heights
+- When decreasing height found, calculate area for popped bars
+- Use sentinel value 0 at end to empty stack
+
 **Solution:**
-```python
-def largestRectangleArea(heights):
-    stack = []
-    max_area = 0
-    heights.append(0)  # Sentinel
+```cpp
+int largestRectangleArea(vector<int>& heights) {
+    heights.push_back(0);  // Sentinel
+    stack<int> st;
+    int maxArea = 0;
     
-    for i, h in enumerate(heights):
-        while stack and heights[stack[-1]] > h:
-            height = heights[stack.pop()]
-            width = i if not stack else i - stack[-1] - 1
-            max_area = max(max_area, height * width)
-        stack.append(i)
+    for (int i = 0; i < heights.size(); i++) {
+        while (!st.empty() && heights[st.top()] > heights[i]) {
+            int height = heights[st.top()];
+            st.pop();
+            int width = st.empty() ? i : i - st.top() - 1;
+            maxArea = max(maxArea, height * width);
+        }
+        st.push(i);
+    }
     
-    return max_area
+    heights.pop_back();  // Remove sentinel
+    return maxArea;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
+
+---
+
+### 5. Trapping Rain Water
+**LeetCode #42**
+
+Calculate trapped water after rain.
+
+```
+Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+Output: 6
+```
+
+**Approach:**
+- Two pointers from both ends
+- Water at position depends on min of max heights from both sides
+
+**Solution:**
+```cpp
+int trap(vector<int>& height) {
+    if (height.empty()) return 0;
+    
+    int left = 0, right = height.size() - 1;
+    int leftMax = height[left], rightMax = height[right];
+    int water = 0;
+    
+    while (left < right) {
+        if (leftMax < rightMax) {
+            left++;
+            leftMax = max(leftMax, height[left]);
+            water += leftMax - height[left];
+        } else {
+            right--;
+            rightMax = max(rightMax, height[right]);
+            water += rightMax - height[right];
+        }
+    }
+    
+    return water;
+}
+```
+**Complexity:** Time O(n), Space O(1)
 
 ---
 

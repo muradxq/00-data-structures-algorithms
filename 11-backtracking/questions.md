@@ -16,7 +16,7 @@
 
 ## 🟡 Medium Problems
 
-### 1. Word Search
+### 4. Word Search
 **LeetCode #79**
 
 Find if word exists in grid (adjacent cells horizontally/vertically).
@@ -29,44 +29,52 @@ Input: board = [["A","B","C","E"],
 Output: true
 ```
 
+**Approach:**
+- DFS from each cell that matches first character
+- Mark visited cells, explore 4 directions
+- Backtrack by restoring cell value
+
 **Solution:**
-```python
-def exist(board, word):
-    rows, cols = len(board), len(board[0])
+```cpp
+bool exist(vector<vector<char>>& board, string word) {
+    int rows = board.size(), cols = board[0].size();
     
-    def backtrack(r, c, idx):
-        if idx == len(word):
-            return True
+    function<bool(int, int, int)> backtrack = [&](int r, int c, int idx) -> bool {
+        if (idx == word.size()) return true;
         
-        if (r < 0 or r >= rows or c < 0 or c >= cols or
-            board[r][c] != word[idx]):
-            return False
+        if (r < 0 || r >= rows || c < 0 || c >= cols || 
+            board[r][c] != word[idx]) {
+            return false;
+        }
         
-        # Mark as visited
-        temp = board[r][c]
-        board[r][c] = '#'
+        // Mark as visited
+        char temp = board[r][c];
+        board[r][c] = '#';
         
-        # Explore all directions
-        found = (backtrack(r+1, c, idx+1) or
-                 backtrack(r-1, c, idx+1) or
-                 backtrack(r, c+1, idx+1) or
-                 backtrack(r, c-1, idx+1))
+        // Explore all directions
+        bool found = backtrack(r + 1, c, idx + 1) ||
+                     backtrack(r - 1, c, idx + 1) ||
+                     backtrack(r, c + 1, idx + 1) ||
+                     backtrack(r, c - 1, idx + 1);
         
-        # Restore
-        board[r][c] = temp
-        return found
+        // Restore
+        board[r][c] = temp;
+        return found;
+    };
     
-    for r in range(rows):
-        for c in range(cols):
-            if backtrack(r, c, 0):
-                return True
-    return False
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (backtrack(r, c, 0)) return true;
+        }
+    }
+    return false;
+}
 ```
 **Complexity:** Time O(m×n×4^L), Space O(L) where L = word length
 
 ---
 
-### 2. Palindrome Partitioning
+### 5. Palindrome Partitioning
 **LeetCode #131**
 
 Partition string so every substring is a palindrome.
@@ -76,34 +84,49 @@ Input: s = "aab"
 Output: [["a","a","b"],["aa","b"]]
 ```
 
+**Approach:**
+- Try all possible prefixes at each step
+- If prefix is palindrome, recursively partition rest
+
 **Solution:**
-```python
-def partition(s):
-    result = []
+```cpp
+vector<vector<string>> partition(string s) {
+    vector<vector<string>> result;
+    vector<string> current;
     
-    def is_palindrome(sub):
-        return sub == sub[::-1]
+    auto isPalindrome = [](const string& str) {
+        int l = 0, r = str.size() - 1;
+        while (l < r) {
+            if (str[l++] != str[r--]) return false;
+        }
+        return true;
+    };
     
-    def backtrack(start, current):
-        if start == len(s):
-            result.append(list(current))
-            return
+    function<void(int)> backtrack = [&](int start) {
+        if (start == s.size()) {
+            result.push_back(current);
+            return;
+        }
         
-        for end in range(start + 1, len(s) + 1):
-            substring = s[start:end]
-            if is_palindrome(substring):
-                current.append(substring)
-                backtrack(end, current)
-                current.pop()
+        for (int end = start + 1; end <= s.size(); end++) {
+            string substring = s.substr(start, end - start);
+            if (isPalindrome(substring)) {
+                current.push_back(substring);
+                backtrack(end);
+                current.pop_back();
+            }
+        }
+    };
     
-    backtrack(0, [])
-    return result
+    backtrack(0);
+    return result;
+}
 ```
 **Complexity:** Time O(n × 2^n), Space O(n)
 
 ---
 
-### 3. Restore IP Addresses
+### 6. Restore IP Addresses
 **LeetCode #93**
 
 Return all valid IP addresses from digit string.
@@ -113,40 +136,56 @@ Input: s = "25525511135"
 Output: ["255.255.11.135","255.255.111.35"]
 ```
 
+**Approach:**
+- IP has exactly 4 parts, each 0-255
+- Try lengths 1-3 for each part
+- Leading zeros only allowed for "0"
+
 **Solution:**
-```python
-def restoreIpAddresses(s):
-    result = []
+```cpp
+vector<string> restoreIpAddresses(string s) {
+    vector<string> result;
+    vector<string> parts;
     
-    def is_valid(segment):
-        if len(segment) > 1 and segment[0] == '0':
-            return False
-        return 0 <= int(segment) <= 255
+    auto isValid = [](const string& segment) {
+        if (segment.size() > 1 && segment[0] == '0') return false;
+        int num = stoi(segment);
+        return num >= 0 && num <= 255;
+    };
     
-    def backtrack(start, parts):
-        if len(parts) == 4:
-            if start == len(s):
-                result.append('.'.join(parts))
-            return
+    function<void(int)> backtrack = [&](int start) {
+        if (parts.size() == 4) {
+            if (start == s.size()) {
+                string ip = parts[0];
+                for (int i = 1; i < 4; i++) {
+                    ip += "." + parts[i];
+                }
+                result.push_back(ip);
+            }
+            return;
+        }
         
-        for length in range(1, 4):
-            if start + length > len(s):
-                break
+        for (int len = 1; len <= 3; len++) {
+            if (start + len > s.size()) break;
             
-            segment = s[start:start + length]
-            if is_valid(segment):
-                parts.append(segment)
-                backtrack(start + length, parts)
-                parts.pop()
+            string segment = s.substr(start, len);
+            if (isValid(segment)) {
+                parts.push_back(segment);
+                backtrack(start + len);
+                parts.pop_back();
+            }
+        }
+    };
     
-    backtrack(0, [])
-    return result
+    backtrack(0);
+    return result;
+}
 ```
 **Complexity:** Time O(1) since IP has limited combinations, Space O(1)
 
 ---
 
-### 4. Combination Sum III
+### 7. Combination Sum III
 **LeetCode #216**
 
 Find combinations of k numbers (1-9) that sum to n. Each number used once.
@@ -156,27 +195,36 @@ Input: k = 3, n = 7
 Output: [[1,2,4]]
 ```
 
+**Approach:**
+- Standard backtracking with two constraints: size k and sum n
+- Prune when current number exceeds remaining sum
+
 **Solution:**
-```python
-def combinationSum3(k, n):
-    result = []
+```cpp
+vector<vector<int>> combinationSum3(int k, int n) {
+    vector<vector<int>> result;
+    vector<int> current;
     
-    def backtrack(start, current, remaining):
-        if len(current) == k:
-            if remaining == 0:
-                result.append(list(current))
-            return
+    function<void(int, int)> backtrack = [&](int start, int remaining) {
+        if (current.size() == k) {
+            if (remaining == 0) {
+                result.push_back(current);
+            }
+            return;
+        }
         
-        for num in range(start, 10):
-            if num > remaining:
-                break
+        for (int num = start; num <= 9; num++) {
+            if (num > remaining) break;  // Pruning
             
-            current.append(num)
-            backtrack(num + 1, current, remaining - num)
-            current.pop()
+            current.push_back(num);
+            backtrack(num + 1, remaining - num);
+            current.pop_back();
+        }
+    };
     
-    backtrack(1, [], n)
-    return result
+    backtrack(1, n);
+    return result;
+}
 ```
 **Complexity:** Time O(C(9,k)), Space O(k)
 
@@ -184,89 +232,163 @@ def combinationSum3(k, n):
 
 ## 🔴 Hard Problems
 
-### 5. N-Queens
+### 1. N-Queens
 **LeetCode #51**
 
 Place N queens on N×N board so none attack each other.
 
+```
+Input: n = 4
+Output: [[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]
+```
+
+**Approach:**
+- Place queen row by row
+- Track columns and diagonals where queens attack
+- Diagonal formula: row-col (main), row+col (anti)
+
 **Solution:**
-```python
-def solveNQueens(n):
-    result = []
-    board = [['.' for _ in range(n)] for _ in range(n)]
-    cols = set()
-    diag1 = set()  # row - col
-    diag2 = set()  # row + col
+```cpp
+vector<vector<string>> solveNQueens(int n) {
+    vector<vector<string>> result;
+    vector<string> board(n, string(n, '.'));
+    unordered_set<int> cols, diag1, diag2;
     
-    def backtrack(row):
-        if row == n:
-            result.append([''.join(r) for r in board])
-            return
+    function<void(int)> backtrack = [&](int row) {
+        if (row == n) {
+            result.push_back(board);
+            return;
+        }
         
-        for col in range(n):
-            if col in cols or (row-col) in diag1 or (row+col) in diag2:
-                continue
+        for (int col = 0; col < n; col++) {
+            if (cols.count(col) || diag1.count(row - col) || diag2.count(row + col)) {
+                continue;
+            }
             
-            board[row][col] = 'Q'
-            cols.add(col)
-            diag1.add(row - col)
-            diag2.add(row + col)
+            board[row][col] = 'Q';
+            cols.insert(col);
+            diag1.insert(row - col);
+            diag2.insert(row + col);
             
-            backtrack(row + 1)
+            backtrack(row + 1);
             
-            board[row][col] = '.'
-            cols.remove(col)
-            diag1.remove(row - col)
-            diag2.remove(row + col)
+            board[row][col] = '.';
+            cols.erase(col);
+            diag1.erase(row - col);
+            diag2.erase(row + col);
+        }
+    };
     
-    backtrack(0)
-    return result
+    backtrack(0);
+    return result;
+}
 ```
 **Complexity:** Time O(n!), Space O(n)
 
 ---
 
-### 6. Sudoku Solver
+### 2. N-Queens II
+**LeetCode #52**
+
+Count distinct N-Queens solutions.
+
+**Solution:**
+```cpp
+int totalNQueens(int n) {
+    int count = 0;
+    unordered_set<int> cols, diag1, diag2;
+    
+    function<void(int)> backtrack = [&](int row) {
+        if (row == n) {
+            count++;
+            return;
+        }
+        
+        for (int col = 0; col < n; col++) {
+            if (cols.count(col) || diag1.count(row - col) || diag2.count(row + col)) {
+                continue;
+            }
+            
+            cols.insert(col);
+            diag1.insert(row - col);
+            diag2.insert(row + col);
+            
+            backtrack(row + 1);
+            
+            cols.erase(col);
+            diag1.erase(row - col);
+            diag2.erase(row + col);
+        }
+    };
+    
+    backtrack(0);
+    return count;
+}
+```
+**Complexity:** Time O(n!), Space O(n)
+
+---
+
+### 3. Sudoku Solver
 **LeetCode #37**
 
 Solve a Sudoku puzzle.
 
+```
+Input: 9x9 board with '.' for empty cells
+Output: Filled board
+```
+
+**Approach:**
+- Find empty cell, try digits 1-9
+- Check validity in row, column, and 3x3 box
+- Backtrack if no valid digit works
+
 **Solution:**
-```python
-def solveSudoku(board):
-    def is_valid(row, col, num):
-        # Check row
-        if num in board[row]:
-            return False
+```cpp
+void solveSudoku(vector<vector<char>>& board) {
+    auto isValid = [&](int row, int col, char num) {
+        // Check row
+        for (int c = 0; c < 9; c++) {
+            if (board[row][c] == num) return false;
+        }
         
-        # Check column
-        for r in range(9):
-            if board[r][col] == num:
-                return False
+        // Check column
+        for (int r = 0; r < 9; r++) {
+            if (board[r][col] == num) return false;
+        }
         
-        # Check 3x3 box
-        box_row, box_col = 3 * (row // 3), 3 * (col // 3)
-        for r in range(box_row, box_row + 3):
-            for c in range(box_col, box_col + 3):
-                if board[r][c] == num:
-                    return False
+        // Check 3x3 box
+        int boxRow = 3 * (row / 3), boxCol = 3 * (col / 3);
+        for (int r = boxRow; r < boxRow + 3; r++) {
+            for (int c = boxCol; c < boxCol + 3; c++) {
+                if (board[r][c] == num) return false;
+            }
+        }
         
-        return True
+        return true;
+    };
     
-    def backtrack():
-        for r in range(9):
-            for c in range(9):
-                if board[r][c] == '.':
-                    for num in '123456789':
-                        if is_valid(r, c, num):
-                            board[r][c] = num
-                            if backtrack():
-                                return True
-                            board[r][c] = '.'
-                    return False
-        return True
+    function<bool()> backtrack = [&]() -> bool {
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == '.') {
+                    for (char num = '1'; num <= '9'; num++) {
+                        if (isValid(r, c, num)) {
+                            board[r][c] = num;
+                            if (backtrack()) return true;
+                            board[r][c] = '.';
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
     
-    backtrack()
+    backtrack();
+}
 ```
 **Complexity:** Time O(9^(empty cells)), Space O(1)
 

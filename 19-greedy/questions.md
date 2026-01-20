@@ -25,14 +25,21 @@ Input: prices = [7,1,5,3,6,4]
 Output: 7 (buy@1, sell@5, buy@3, sell@6)
 ```
 
+**Approach:**
+- Capture all upward price movements
+- Add profit whenever price increases
+
 **Solution:**
-```python
-def maxProfit(prices):
-    profit = 0
-    for i in range(1, len(prices)):
-        if prices[i] > prices[i-1]:
-            profit += prices[i] - prices[i-1]
-    return profit
+```cpp
+int maxProfit(vector<int>& prices) {
+    int profit = 0;
+    for (int i = 1; i < prices.size(); i++) {
+        if (prices[i] > prices[i - 1]) {
+            profit += prices[i] - prices[i - 1];
+        }
+    }
+    return profit;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -48,15 +55,20 @@ Input: nums = [2,3,1,1,4]
 Output: true
 ```
 
+**Approach:**
+- Track maximum reachable index
+- If current index > max reachable, can't proceed
+
 **Solution:**
-```python
-def canJump(nums):
-    max_reach = 0
-    for i, jump in enumerate(nums):
-        if i > max_reach:
-            return False
-        max_reach = max(max_reach, i + jump)
-    return True
+```cpp
+bool canJump(vector<int>& nums) {
+    int maxReach = 0;
+    for (int i = 0; i < nums.size(); i++) {
+        if (i > maxReach) return false;
+        maxReach = max(maxReach, i + nums[i]);
+    }
+    return true;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -72,21 +84,28 @@ Input: nums = [2,3,1,1,4]
 Output: 2 (0→1→4)
 ```
 
+**Approach:**
+- BFS-like: track current range end and farthest reachable
+- Increment jumps when reaching current range end
+
 **Solution:**
-```python
-def jump(nums):
-    jumps = 0
-    current_end = 0
-    farthest = 0
+```cpp
+int jump(vector<int>& nums) {
+    int jumps = 0;
+    int currentEnd = 0;
+    int farthest = 0;
     
-    for i in range(len(nums) - 1):
-        farthest = max(farthest, i + nums[i])
+    for (int i = 0; i < nums.size() - 1; i++) {
+        farthest = max(farthest, i + nums[i]);
         
-        if i == current_end:
-            jumps += 1
-            current_end = farthest
+        if (i == currentEnd) {
+            jumps++;
+            currentEnd = farthest;
+        }
+    }
     
-    return jumps
+    return jumps;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -102,22 +121,33 @@ Input: gas = [1,2,3,4,5], cost = [3,4,5,1,2]
 Output: 3
 ```
 
+**Approach:**
+- If total gas >= total cost, solution exists
+- Start from station after where tank goes negative
+
 **Solution:**
-```python
-def canCompleteCircuit(gas, cost):
-    if sum(gas) < sum(cost):
-        return -1
+```cpp
+int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+    int totalGas = 0, totalCost = 0;
+    for (int i = 0; i < gas.size(); i++) {
+        totalGas += gas[i];
+        totalCost += cost[i];
+    }
+    if (totalGas < totalCost) return -1;
     
-    tank = 0
-    start = 0
+    int tank = 0;
+    int start = 0;
     
-    for i in range(len(gas)):
-        tank += gas[i] - cost[i]
-        if tank < 0:
-            tank = 0
-            start = i + 1
+    for (int i = 0; i < gas.size(); i++) {
+        tank += gas[i] - cost[i];
+        if (tank < 0) {
+            tank = 0;
+            start = i + 1;
+        }
+    }
     
-    return start
+    return start;
+}
 ```
 **Complexity:** Time O(n), Space O(1)
 
@@ -133,20 +163,32 @@ Input: s = "ababcbacadefegdehijhklij"
 Output: [9,7,8]
 ```
 
+**Approach:**
+- Find last occurrence of each character
+- Extend partition end to include all occurrences
+- Split when current index reaches partition end
+
 **Solution:**
-```python
-def partitionLabels(s):
-    last = {c: i for i, c in enumerate(s)}
-    result = []
-    start = end = 0
+```cpp
+vector<int> partitionLabels(string s) {
+    vector<int> last(26);
+    for (int i = 0; i < s.size(); i++) {
+        last[s[i] - 'a'] = i;
+    }
     
-    for i, c in enumerate(s):
-        end = max(end, last[c])
-        if i == end:
-            result.append(end - start + 1)
-            start = i + 1
+    vector<int> result;
+    int start = 0, end = 0;
     
-    return result
+    for (int i = 0; i < s.size(); i++) {
+        end = max(end, last[s[i] - 'a']);
+        if (i == end) {
+            result.push_back(end - start + 1);
+            start = i + 1;
+        }
+    }
+    
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(26)
 
@@ -158,29 +200,40 @@ def partitionLabels(s):
 **LeetCode #135**
 
 Distribute minimum candies with constraints.
+- Each child gets at least 1 candy
+- Higher rating child gets more than neighbors
 
 ```
 Input: ratings = [1,0,2]
 Output: 5 (candies: [2,1,2])
 ```
 
+**Approach:**
+- Two passes: left-to-right, then right-to-left
+- Each pass ensures one neighbor constraint
+
 **Solution:**
-```python
-def candy(ratings):
-    n = len(ratings)
-    candies = [1] * n
+```cpp
+int candy(vector<int>& ratings) {
+    int n = ratings.size();
+    vector<int> candies(n, 1);
     
-    # Left to right
-    for i in range(1, n):
-        if ratings[i] > ratings[i-1]:
-            candies[i] = candies[i-1] + 1
+    // Left to right: handle increasing ratings
+    for (int i = 1; i < n; i++) {
+        if (ratings[i] > ratings[i - 1]) {
+            candies[i] = candies[i - 1] + 1;
+        }
+    }
     
-    # Right to left
-    for i in range(n-2, -1, -1):
-        if ratings[i] > ratings[i+1]:
-            candies[i] = max(candies[i], candies[i+1] + 1)
+    // Right to left: handle decreasing ratings
+    for (int i = n - 2; i >= 0; i--) {
+        if (ratings[i] > ratings[i + 1]) {
+            candies[i] = max(candies[i], candies[i + 1] + 1);
+        }
+    }
     
-    return sum(candies)
+    return accumulate(candies.begin(), candies.end(), 0);
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 

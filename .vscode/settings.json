@@ -1,0 +1,19 @@
+{
+    // Disable GitHub Copilot for solution files - practice writing solutions yourself!
+    "github.copilot.enable": {
+        "*": true,
+        "**/solutions/*.cpp": false
+    },
+    
+    // Disable Cursor AI suggestions for solution files
+    "cursor.cpp.enableCompletions": false,
+    
+    // Alternative: Disable inline suggestions for these patterns
+    "editor.inlineSuggest.enabled": true,
+    
+    // File nesting for cleaner view
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "CMakeLists.txt": "*.cmake"
+    }
+}

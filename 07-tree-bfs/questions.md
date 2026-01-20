@@ -4,14 +4,14 @@
 
 | # | Problem | Difficulty | Variant | Status |
 |---|---------|------------|---------|--------|
-| 1 | Binary Tree Level Order Traversal | Medium | Basic | ⬜ |
-| 2 | Binary Tree Level Order Traversal II | Medium | Reverse | ⬜ |
-| 3 | Binary Tree Zigzag Level Order | Medium | Zigzag | ⬜ |
-| 4 | Average of Levels in Binary Tree | Easy | Level Stats | ⬜ |
-| 5 | Minimum Depth of Binary Tree | Easy | Min Depth | ⬜ |
-| 6 | Binary Tree Right Side View | Medium | Side View | ⬜ |
-| 7 | Populating Next Right Pointers | Medium | Connect Nodes | ⬜ |
-| 8 | Cousins in Binary Tree | Easy | Relationships | ⬜ |
+| 1 | Average of Levels in Binary Tree | Easy | Level Stats | ⬜ |
+| 2 | Minimum Depth of Binary Tree | Easy | Min Depth | ⬜ |
+| 3 | Cousins in Binary Tree | Easy | Relationships | ⬜ |
+| 4 | Binary Tree Level Order Traversal | Medium | Basic | ⬜ |
+| 5 | Binary Tree Level Order Traversal II | Medium | Reverse | ⬜ |
+| 6 | Binary Tree Zigzag Level Order | Medium | Zigzag | ⬜ |
+| 7 | Binary Tree Right Side View | Medium | Side View | ⬜ |
+| 8 | Populating Next Right Pointers | Medium | Connect Nodes | ⬜ |
 
 ---
 
@@ -31,33 +31,37 @@ Input:     3
 Output: [3.0, 14.5, 11.0]
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- BFS with level tracking
+- Sum all values at each level and divide by count
 
-def averageOfLevels(root):
-    if not root:
-        return []
+**Solution:**
+```cpp
+vector<double> averageOfLevels(TreeNode* root) {
+    vector<double> result;
+    if (!root) return result;
     
-    result = []
-    queue = deque([root])
+    queue<TreeNode*> q;
+    q.push(root);
     
-    while queue:
-        level_size = len(queue)
-        level_sum = 0
+    while (!q.empty()) {
+        int levelSize = q.size();
+        double levelSum = 0;
         
-        for _ in range(level_size):
-            node = queue.popleft()
-            level_sum += node.val
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
+            levelSum += node->val;
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
         
-        result.append(level_sum / level_size)
+        result.push_back(levelSum / levelSize);
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -77,29 +81,33 @@ Input:     3
 Output: 2 (path 3→9)
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- BFS finds shortest path first
+- Return immediately when leaf node is found
 
-def minDepth(root):
-    if not root:
-        return 0
+**Solution:**
+```cpp
+int minDepth(TreeNode* root) {
+    if (!root) return 0;
     
-    queue = deque([(root, 1)])
+    queue<pair<TreeNode*, int>> q;
+    q.push({root, 1});
     
-    while queue:
-        node, depth = queue.popleft()
+    while (!q.empty()) {
+        auto [node, depth] = q.front();
+        q.pop();
         
-        # Found leaf node - return immediately (BFS finds shortest first)
-        if not node.left and not node.right:
-            return depth
+        // Found leaf node - return immediately
+        if (!node->left && !node->right) {
+            return depth;
+        }
         
-        if node.left:
-            queue.append((node.left, depth + 1))
-        if node.right:
-            queue.append((node.right, depth + 1))
+        if (node->left) q.push({node->left, depth + 1});
+        if (node->right) q.push({node->right, depth + 1});
+    }
     
-    return 0
+    return 0;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -120,37 +128,43 @@ Input: root = [1,2,3,4], x = 4, y = 3
 Output: false (different depths)
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- Track parent and depth for both nodes
+- Compare at end of each level
 
-def isCousins(root, x, y):
-    queue = deque([(root, None)])  # (node, parent)
+**Solution:**
+```cpp
+bool isCousins(TreeNode* root, int x, int y) {
+    queue<pair<TreeNode*, TreeNode*>> q;  // {node, parent}
+    q.push({root, nullptr});
     
-    while queue:
-        level_size = len(queue)
-        x_parent = y_parent = None
+    while (!q.empty()) {
+        int levelSize = q.size();
+        TreeNode* xParent = nullptr;
+        TreeNode* yParent = nullptr;
         
-        for _ in range(level_size):
-            node, parent = queue.popleft()
+        for (int i = 0; i < levelSize; i++) {
+            auto [node, parent] = q.front();
+            q.pop();
             
-            if node.val == x:
-                x_parent = parent
-            if node.val == y:
-                y_parent = parent
+            if (node->val == x) xParent = parent;
+            if (node->val == y) yParent = parent;
             
-            if node.left:
-                queue.append((node.left, node))
-            if node.right:
-                queue.append((node.right, node))
+            if (node->left) q.push({node->left, node});
+            if (node->right) q.push({node->right, node});
+        }
         
-        # Check after processing level
-        if x_parent and y_parent:
-            return x_parent != y_parent  # Same level, different parents
-        if x_parent or y_parent:
-            return False  # Different levels
+        // Check after processing level
+        if (xParent && yParent) {
+            return xParent != yParent;  // Same level, different parents
+        }
+        if (xParent || yParent) {
+            return false;  // Different levels
+        }
+    }
     
-    return False
+    return false;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -172,33 +186,36 @@ Input:     3
 Output: [[3], [9,20], [15,7]]
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- Standard BFS, capture level size before processing each level
 
-def levelOrder(root):
-    if not root:
-        return []
+**Solution:**
+```cpp
+vector<vector<int>> levelOrder(TreeNode* root) {
+    vector<vector<int>> result;
+    if (!root) return result;
     
-    result = []
-    queue = deque([root])
+    queue<TreeNode*> q;
+    q.push(root);
     
-    while queue:
-        level_size = len(queue)
-        current_level = []
+    while (!q.empty()) {
+        int levelSize = q.size();
+        vector<int> currentLevel;
         
-        for _ in range(level_size):
-            node = queue.popleft()
-            current_level.append(node.val)
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
+            currentLevel.push_back(node->val);
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
         
-        result.append(current_level)
+        result.push_back(currentLevel);
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -218,34 +235,37 @@ Input:     3
 Output: [[15,7], [9,20], [3]]
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- Same as level order, then reverse the result
 
-def levelOrderBottom(root):
-    if not root:
-        return []
+**Solution:**
+```cpp
+vector<vector<int>> levelOrderBottom(TreeNode* root) {
+    vector<vector<int>> result;
+    if (!root) return result;
     
-    result = []
-    queue = deque([root])
+    queue<TreeNode*> q;
+    q.push(root);
     
-    while queue:
-        level_size = len(queue)
-        current_level = []
+    while (!q.empty()) {
+        int levelSize = q.size();
+        vector<int> currentLevel;
         
-        for _ in range(level_size):
-            node = queue.popleft()
-            current_level.append(node.val)
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
+            currentLevel.push_back(node->val);
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
         
-        result.append(current_level)
+        result.push_back(currentLevel);
+    }
     
-    result.reverse()  # Or use result.insert(0, current_level)
-    return result
+    reverse(result.begin(), result.end());
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -265,39 +285,43 @@ Input:     3
 Output: [[3], [20,9], [15,7]]
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- Alternate insertion direction at each level
 
-def zigzagLevelOrder(root):
-    if not root:
-        return []
+**Solution:**
+```cpp
+vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+    vector<vector<int>> result;
+    if (!root) return result;
     
-    result = []
-    queue = deque([root])
-    left_to_right = True
+    queue<TreeNode*> q;
+    q.push(root);
+    bool leftToRight = true;
     
-    while queue:
-        level_size = len(queue)
-        current_level = deque()
+    while (!q.empty()) {
+        int levelSize = q.size();
+        deque<int> currentLevel;
         
-        for _ in range(level_size):
-            node = queue.popleft()
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
             
-            if left_to_right:
-                current_level.append(node.val)
-            else:
-                current_level.appendleft(node.val)
+            if (leftToRight) {
+                currentLevel.push_back(node->val);
+            } else {
+                currentLevel.push_front(node->val);
+            }
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
         
-        result.append(list(current_level))
-        left_to_right = not left_to_right
+        result.push_back(vector<int>(currentLevel.begin(), currentLevel.end()));
+        leftToRight = !leftToRight;
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -317,33 +341,37 @@ Input:     1
 Output: [1, 3, 4]
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach:**
+- Take last node of each level
 
-def rightSideView(root):
-    if not root:
-        return []
+**Solution:**
+```cpp
+vector<int> rightSideView(TreeNode* root) {
+    vector<int> result;
+    if (!root) return result;
     
-    result = []
-    queue = deque([root])
+    queue<TreeNode*> q;
+    q.push(root);
     
-    while queue:
-        level_size = len(queue)
+    while (!q.empty()) {
+        int levelSize = q.size();
         
-        for i in range(level_size):
-            node = queue.popleft()
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
             
-            # Last node in level = rightmost
-            if i == level_size - 1:
-                result.append(node.val)
+            // Last node in level = rightmost
+            if (i == levelSize - 1) {
+                result.push_back(node->val);
+            }
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+    }
     
-    return result
+    return result;
+}
 ```
 **Complexity:** Time O(n), Space O(n)
 
@@ -362,59 +390,63 @@ Input:     1               1 → NULL
        4  5 6  7       4→5→6→7 → NULL
 ```
 
-**Solution:**
-```python
-from collections import deque
+**Approach (BFS):**
+- Connect each node to next node in same level
 
-def connect(root):
-    if not root:
-        return root
+```cpp
+Node* connect(Node* root) {
+    if (!root) return root;
     
-    queue = deque([root])
+    queue<Node*> q;
+    q.push(root);
     
-    while queue:
-        level_size = len(queue)
-        prev = None
+    while (!q.empty()) {
+        int levelSize = q.size();
+        Node* prev = nullptr;
         
-        for _ in range(level_size):
-            node = queue.popleft()
+        for (int i = 0; i < levelSize; i++) {
+            Node* node = q.front();
+            q.pop();
             
-            if prev:
-                prev.next = node
-            prev = node
+            if (prev) prev->next = node;
+            prev = node;
             
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+    }
     
-    return root
+    return root;
+}
 ```
 
 **O(1) Space Solution (Perfect Binary Tree):**
-```python
-def connect(root):
-    if not root:
-        return root
+```cpp
+Node* connect(Node* root) {
+    if (!root) return root;
     
-    leftmost = root
+    Node* leftmost = root;
     
-    while leftmost.left:
-        head = leftmost
+    while (leftmost->left) {
+        Node* head = leftmost;
         
-        while head:
-            # Connect left child to right child
-            head.left.next = head.right
+        while (head) {
+            // Connect left child to right child
+            head->left->next = head->right;
             
-            # Connect right child to next node's left child
-            if head.next:
-                head.right.next = head.next.left
+            // Connect right child to next node's left child
+            if (head->next) {
+                head->right->next = head->next->left;
+            }
             
-            head = head.next
+            head = head->next;
+        }
         
-        leftmost = leftmost.left
+        leftmost = leftmost->left;
+    }
     
-    return root
+    return root;
+}
 ```
 **Complexity:** Time O(n), Space O(1) for perfect binary tree
 
@@ -422,8 +454,8 @@ def connect(root):
 
 ## 📚 Study Tips for Tree BFS
 
-1. **Level boundary:** Always capture `len(queue)` before processing
-2. **Track extra info:** Use tuples `(node, depth, parent)` when needed
+1. **Level boundary:** Always capture `queue.size()` before processing
+2. **Track extra info:** Use pairs `{node, depth}` or `{node, parent}` when needed
 3. **Early return:** BFS finds shortest paths first - use for minimum problems
 4. **Variations:** Zigzag, reverse, and side views are simple modifications
 

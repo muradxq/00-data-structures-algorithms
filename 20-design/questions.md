@@ -16,100 +16,194 @@
 
 ## 🟢 Easy Problems
 
-### 1. Implement Queue using Stacks
+### 3. Implement Queue using Stacks
 **LeetCode #232**
 
 Implement FIFO queue using two stacks.
 
+**Approach:**
+- Use two stacks: input and output
+- Lazy transfer from input to output when needed
+
 **Solution:**
-```python
-class MyQueue:
-    def __init__(self):
-        self.in_stack = []
-        self.out_stack = []
+```cpp
+class MyQueue {
+    stack<int> inStack, outStack;
     
-    def push(self, x):
-        self.in_stack.append(x)
+    void transfer() {
+        if (outStack.empty()) {
+            while (!inStack.empty()) {
+                outStack.push(inStack.top());
+                inStack.pop();
+            }
+        }
+    }
     
-    def pop(self):
-        self._move()
-        return self.out_stack.pop()
+public:
+    void push(int x) {
+        inStack.push(x);
+    }
     
-    def peek(self):
-        self._move()
-        return self.out_stack[-1]
+    int pop() {
+        transfer();
+        int val = outStack.top();
+        outStack.pop();
+        return val;
+    }
     
-    def empty(self):
-        return not self.in_stack and not self.out_stack
+    int peek() {
+        transfer();
+        return outStack.top();
+    }
     
-    def _move(self):
-        if not self.out_stack:
-            while self.in_stack:
-                self.out_stack.append(self.in_stack.pop())
+    bool empty() {
+        return inStack.empty() && outStack.empty();
+    }
+};
 ```
 **Complexity:** Amortized O(1) per operation
 
 ---
 
+### 6. Design HashMap
+**LeetCode #706**
+
+Design a HashMap without using built-in hash table libraries.
+
+**Approach:**
+- Use array of buckets with chaining for collision handling
+- Simple hash function: key % bucket_count
+
+**Solution:**
+```cpp
+class MyHashMap {
+    static const int SIZE = 10007;
+    vector<list<pair<int, int>>> buckets;
+    
+    int hash(int key) {
+        return key % SIZE;
+    }
+    
+public:
+    MyHashMap() : buckets(SIZE) {}
+    
+    void put(int key, int value) {
+        int idx = hash(key);
+        for (auto& [k, v] : buckets[idx]) {
+            if (k == key) {
+                v = value;
+                return;
+            }
+        }
+        buckets[idx].push_back({key, value});
+    }
+    
+    int get(int key) {
+        int idx = hash(key);
+        for (auto& [k, v] : buckets[idx]) {
+            if (k == key) return v;
+        }
+        return -1;
+    }
+    
+    void remove(int key) {
+        int idx = hash(key);
+        buckets[idx].remove_if([key](auto& p) { return p.first == key; });
+    }
+};
+```
+**Complexity:** Average O(1), Worst O(n) per operation
+
+---
+
 ## 🟡 Medium Problems
 
-### 2. Min Stack
+### 1. Min Stack
 **LeetCode #155**
 
 Stack with O(1) getMin operation.
 
+**Approach:**
+- Maintain parallel stack tracking minimum at each level
+
 **Solution:**
-```python
-class MinStack:
-    def __init__(self):
-        self.stack = []
-        self.min_stack = []
+```cpp
+class MinStack {
+    stack<int> dataStack;
+    stack<int> minStack;
     
-    def push(self, val):
-        self.stack.append(val)
-        if not self.min_stack or val <= self.min_stack[-1]:
-            self.min_stack.append(val)
+public:
+    void push(int val) {
+        dataStack.push(val);
+        if (minStack.empty() || val <= minStack.top()) {
+            minStack.push(val);
+        }
+    }
     
-    def pop(self):
-        if self.stack.pop() == self.min_stack[-1]:
-            self.min_stack.pop()
+    void pop() {
+        if (dataStack.top() == minStack.top()) {
+            minStack.pop();
+        }
+        dataStack.pop();
+    }
     
-    def top(self):
-        return self.stack[-1]
+    int top() {
+        return dataStack.top();
+    }
     
-    def getMin(self):
-        return self.min_stack[-1]
+    int getMin() {
+        return minStack.top();
+    }
+};
 ```
 **Complexity:** All operations O(1)
 
 ---
 
-### 3. LRU Cache
+### 2. LRU Cache
 **LeetCode #146**
 
 Least Recently Used cache with O(1) operations.
 
-**Solution:**
-```python
-from collections import OrderedDict
+**Approach:**
+- HashMap for O(1) key lookup
+- Doubly linked list to track access order
 
-class LRUCache:
-    def __init__(self, capacity):
-        self.cache = OrderedDict()
-        self.capacity = capacity
+**Solution:**
+```cpp
+class LRUCache {
+    int capacity;
+    list<pair<int, int>> cache;  // {key, value}
+    unordered_map<int, list<pair<int, int>>::iterator> map;
     
-    def get(self, key):
-        if key not in self.cache:
-            return -1
-        self.cache.move_to_end(key)
-        return self.cache[key]
+public:
+    LRUCache(int capacity) : capacity(capacity) {}
     
-    def put(self, key, value):
-        if key in self.cache:
-            self.cache.move_to_end(key)
-        self.cache[key] = value
-        if len(self.cache) > self.capacity:
-            self.cache.popitem(last=False)
+    int get(int key) {
+        if (!map.count(key)) return -1;
+        
+        // Move to front (most recent)
+        cache.splice(cache.begin(), cache, map[key]);
+        return map[key]->second;
+    }
+    
+    void put(int key, int value) {
+        if (map.count(key)) {
+            cache.splice(cache.begin(), cache, map[key]);
+            map[key]->second = value;
+            return;
+        }
+        
+        if (cache.size() == capacity) {
+            int lruKey = cache.back().first;
+            map.erase(lruKey);
+            cache.pop_back();
+        }
+        
+        cache.push_front({key, value});
+        map[key] = cache.begin();
+    }
+};
 ```
 **Complexity:** All operations O(1)
 
@@ -120,98 +214,184 @@ class LRUCache:
 
 Implement Twitter with follow, unfollow, post, and news feed.
 
-**Solution:**
-```python
-from collections import defaultdict
-import heapq
+**Approach:**
+- Map users to their tweets (with timestamps)
+- Map users to their followed users
+- Use heap to merge tweets for news feed
 
-class Twitter:
-    def __init__(self):
-        self.time = 0
-        self.tweets = defaultdict(list)  # userId -> [(time, tweetId)]
-        self.following = defaultdict(set)  # userId -> set of userIds
+**Solution:**
+```cpp
+class Twitter {
+    int timestamp = 0;
+    unordered_map<int, vector<pair<int, int>>> tweets;  // userId -> {time, tweetId}
+    unordered_map<int, unordered_set<int>> following;   // userId -> set of followees
     
-    def postTweet(self, userId, tweetId):
-        self.tweets[userId].append((self.time, tweetId))
-        self.time += 1
+public:
+    void postTweet(int userId, int tweetId) {
+        tweets[userId].push_back({timestamp++, tweetId});
+    }
     
-    def getNewsFeed(self, userId):
-        # Get tweets from user and following
-        users = self.following[userId] | {userId}
-        heap = []
+    vector<int> getNewsFeed(int userId) {
+        // Max-heap: {time, tweetId}
+        priority_queue<pair<int, int>> pq;
         
-        for user in users:
-            for tweet in self.tweets[user][-10:]:
-                heapq.heappush(heap, tweet)
-                if len(heap) > 10:
-                    heapq.heappop(heap)
+        // Add user's own tweets
+        for (auto& [time, id] : tweets[userId]) {
+            pq.push({time, id});
+        }
         
-        return [t[1] for t in sorted(heap, reverse=True)]
+        // Add followees' tweets
+        for (int followee : following[userId]) {
+            for (auto& [time, id] : tweets[followee]) {
+                pq.push({time, id});
+            }
+        }
+        
+        vector<int> feed;
+        while (!pq.empty() && feed.size() < 10) {
+            feed.push_back(pq.top().second);
+            pq.pop();
+        }
+        return feed;
+    }
     
-    def follow(self, followerId, followeeId):
-        if followerId != followeeId:
-            self.following[followerId].add(followeeId)
+    void follow(int followerId, int followeeId) {
+        if (followerId != followeeId) {
+            following[followerId].insert(followeeId);
+        }
+    }
     
-    def unfollow(self, followerId, followeeId):
-        self.following[followerId].discard(followeeId)
+    void unfollow(int followerId, int followeeId) {
+        following[followerId].erase(followeeId);
+    }
+};
 ```
-**Complexity:** postTweet O(1), getNewsFeed O(n log 10), follow/unfollow O(1)
+**Complexity:** postTweet O(1), getNewsFeed O(n log n), follow/unfollow O(1)
+
+---
+
+### 5. Design Circular Queue
+**LeetCode #622**
+
+Implement circular queue with fixed size.
+
+**Approach:**
+- Use array with front and rear pointers
+- Wrap around using modulo
+
+**Solution:**
+```cpp
+class MyCircularQueue {
+    vector<int> data;
+    int front = 0, rear = -1, size = 0, capacity;
+    
+public:
+    MyCircularQueue(int k) : data(k), capacity(k) {}
+    
+    bool enQueue(int value) {
+        if (isFull()) return false;
+        rear = (rear + 1) % capacity;
+        data[rear] = value;
+        size++;
+        return true;
+    }
+    
+    bool deQueue() {
+        if (isEmpty()) return false;
+        front = (front + 1) % capacity;
+        size--;
+        return true;
+    }
+    
+    int Front() {
+        return isEmpty() ? -1 : data[front];
+    }
+    
+    int Rear() {
+        return isEmpty() ? -1 : data[rear];
+    }
+    
+    bool isEmpty() {
+        return size == 0;
+    }
+    
+    bool isFull() {
+        return size == capacity;
+    }
+};
+```
+**Complexity:** All operations O(1)
 
 ---
 
 ## 🔴 Hard Problems
 
-### 5. LFU Cache
+### 7. LFU Cache
 **LeetCode #460**
 
 Least Frequently Used cache with O(1) operations.
 
-**Solution:**
-```python
-from collections import defaultdict
+**Approach:**
+- HashMap for key -> {value, frequency}
+- HashMap for frequency -> list of keys (in LRU order)
+- Track minimum frequency
 
-class LFUCache:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.cache = {}  # key -> (value, freq)
-        self.freq_map = defaultdict(dict)  # freq -> {key: None}
-        self.min_freq = 0
+**Solution:**
+```cpp
+class LFUCache {
+    int capacity, minFreq = 0;
+    unordered_map<int, pair<int, int>> keyToValFreq;  // key -> {value, freq}
+    unordered_map<int, list<int>> freqToKeys;         // freq -> list of keys
+    unordered_map<int, list<int>::iterator> keyToIter; // key -> iterator in freq list
     
-    def get(self, key):
-        if key not in self.cache:
-            return -1
+    void updateFreq(int key) {
+        int freq = keyToValFreq[key].second;
+        freqToKeys[freq].erase(keyToIter[key]);
         
-        value, freq = self.cache[key]
-        self._update_freq(key, freq)
-        return value
+        if (freqToKeys[freq].empty()) {
+            freqToKeys.erase(freq);
+            if (minFreq == freq) minFreq++;
+        }
+        
+        keyToValFreq[key].second++;
+        freqToKeys[freq + 1].push_back(key);
+        keyToIter[key] = prev(freqToKeys[freq + 1].end());
+    }
     
-    def put(self, key, value):
-        if self.capacity == 0:
-            return
-        
-        if key in self.cache:
-            _, freq = self.cache[key]
-            self.cache[key] = (value, freq)
-            self._update_freq(key, freq)
-        else:
-            if len(self.cache) >= self.capacity:
-                # Remove LFU item
-                lfu_key = next(iter(self.freq_map[self.min_freq]))
-                del self.freq_map[self.min_freq][lfu_key]
-                del self.cache[lfu_key]
-            
-            self.cache[key] = (value, 1)
-            self.freq_map[1][key] = None
-            self.min_freq = 1
+public:
+    LFUCache(int capacity) : capacity(capacity) {}
     
-    def _update_freq(self, key, freq):
-        del self.freq_map[freq][key]
-        if not self.freq_map[freq] and self.min_freq == freq:
-            self.min_freq += 1
+    int get(int key) {
+        if (!keyToValFreq.count(key)) return -1;
+        updateFreq(key);
+        return keyToValFreq[key].first;
+    }
+    
+    void put(int key, int value) {
+        if (capacity == 0) return;
         
-        self.freq_map[freq + 1][key] = None
-        value, _ = self.cache[key]
-        self.cache[key] = (value, freq + 1)
+        if (keyToValFreq.count(key)) {
+            keyToValFreq[key].first = value;
+            updateFreq(key);
+            return;
+        }
+        
+        if (keyToValFreq.size() == capacity) {
+            int evictKey = freqToKeys[minFreq].front();
+            freqToKeys[minFreq].pop_front();
+            if (freqToKeys[minFreq].empty()) {
+                freqToKeys.erase(minFreq);
+            }
+            keyToValFreq.erase(evictKey);
+            keyToIter.erase(evictKey);
+        }
+        
+        keyToValFreq[key] = {value, 1};
+        freqToKeys[1].push_back(key);
+        keyToIter[key] = prev(freqToKeys[1].end());
+        minFreq = 1;
+    }
+};
 ```
 **Complexity:** All operations O(1)
 

@@ -32,22 +32,29 @@ Input: nums = [-1,0,3,5,9,12], target = 9
 Output: 4
 ```
 
+**Approach:**
+- Compare middle element with target
+- Narrow search space by half each iteration
+
 **Solution:**
-```python
-def search(nums, target):
-    left, right = 0, len(nums) - 1
+```cpp
+int search(vector<int>& nums, int target) {
+    int left = 0, right = nums.size() - 1;
     
-    while left <= right:
-        mid = left + (right - left) // 2
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
         
-        if nums[mid] == target:
-            return mid
-        elif nums[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
     
-    return -1
+    return -1;
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -63,22 +70,28 @@ Input: nums = [1,3,5,6], target = 5 → Output: 2
 Input: nums = [1,3,5,6], target = 2 → Output: 1
 ```
 
+**Approach:**
+- Standard binary search, return left pointer if not found
+
 **Solution:**
-```python
-def searchInsert(nums, target):
-    left, right = 0, len(nums) - 1
+```cpp
+int searchInsert(vector<int>& nums, int target) {
+    int left = 0, right = nums.size() - 1;
     
-    while left <= right:
-        mid = left + (right - left) // 2
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
         
-        if nums[mid] == target:
-            return mid
-        elif nums[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
     
-    return left  # Insert position
+    return left;  // Insert position
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -96,20 +109,27 @@ Versions: [1, 2, 3, 4, 5]
 Output: 4
 ```
 
+**Approach:**
+- Binary search for leftmost bad version
+- Use `left < right` template
+
 **Solution:**
-```python
-def firstBadVersion(n):
-    left, right = 1, n
+```cpp
+int firstBadVersion(int n) {
+    int left = 1, right = n;
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if isBadVersion(mid):
-            right = mid      # Could be first bad
-        else:
-            left = mid + 1   # First bad is after mid
+        if (isBadVersion(mid)) {
+            right = mid;      // Could be first bad
+        } else {
+            left = mid + 1;   // First bad is after mid
+        }
+    }
     
-    return left
+    return left;
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -125,26 +145,31 @@ Input: x = 8
 Output: 2 (sqrt(8) ≈ 2.83, truncate to 2)
 ```
 
+**Approach:**
+- Binary search for largest integer whose square ≤ x
+
 **Solution:**
-```python
-def mySqrt(x):
-    if x < 2:
-        return x
+```cpp
+int mySqrt(int x) {
+    if (x < 2) return x;
     
-    left, right = 1, x // 2
+    int left = 1, right = x / 2;
     
-    while left <= right:
-        mid = left + (right - left) // 2
-        square = mid * mid
+    while (left <= right) {
+        long mid = left + (right - left) / 2;
+        long square = mid * mid;
         
-        if square == x:
-            return mid
-        elif square < x:
-            left = mid + 1
-        else:
-            right = mid - 1
+        if (square == x) {
+            return mid;
+        } else if (square < x) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
     
-    return right  # Largest integer where square <= x
+    return right;  // Largest integer where square <= x
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -162,33 +187,42 @@ Input: nums = [4,5,6,7,0,1,2], target = 0
 Output: 4
 ```
 
-**Key:** One half is always sorted.
+**Approach:**
+- One half is always sorted
+- Check which half is sorted and if target is in that range
 
 **Solution:**
-```python
-def search(nums, target):
-    left, right = 0, len(nums) - 1
+```cpp
+int search(vector<int>& nums, int target) {
+    int left = 0, right = nums.size() - 1;
     
-    while left <= right:
-        mid = left + (right - left) // 2
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
         
-        if nums[mid] == target:
-            return mid
+        if (nums[mid] == target) {
+            return mid;
+        }
         
-        # Left half is sorted
-        if nums[left] <= nums[mid]:
-            if nums[left] <= target < nums[mid]:
-                right = mid - 1
-            else:
-                left = mid + 1
-        # Right half is sorted
-        else:
-            if nums[mid] < target <= nums[right]:
-                left = mid + 1
-            else:
-                right = mid - 1
+        // Left half is sorted
+        if (nums[left] <= nums[mid]) {
+            if (nums[left] <= target && target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        // Right half is sorted
+        else {
+            if (nums[mid] < target && target <= nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    }
     
-    return -1
+    return -1;
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -204,35 +238,46 @@ Input: nums = [5,7,7,8,8,10], target = 8
 Output: [3,4]
 ```
 
+**Approach:**
+- Two binary searches: one for leftmost, one for rightmost
+
 **Solution:**
-```python
-def searchRange(nums, target):
-    def find_left():
-        left, right = 0, len(nums) - 1
-        while left <= right:
-            mid = left + (right - left) // 2
-            if nums[mid] >= target:
-                right = mid - 1
-            else:
-                left = mid + 1
-        return left
+```cpp
+vector<int> searchRange(vector<int>& nums, int target) {
+    auto findLeft = [&]() {
+        int left = 0, right = nums.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] >= target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    };
     
-    def find_right():
-        left, right = 0, len(nums) - 1
-        while left <= right:
-            mid = left + (right - left) // 2
-            if nums[mid] <= target:
-                left = mid + 1
-            else:
-                right = mid - 1
-        return right
+    auto findRight = [&]() {
+        int left = 0, right = nums.size() - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return right;
+    };
     
-    left_idx = find_left()
-    right_idx = find_right()
+    int leftIdx = findLeft();
+    int rightIdx = findRight();
     
-    if left_idx <= right_idx and left_idx < len(nums) and nums[left_idx] == target:
-        return [left_idx, right_idx]
-    return [-1, -1]
+    if (leftIdx <= rightIdx && leftIdx < nums.size() && nums[leftIdx] == target) {
+        return {leftIdx, rightIdx};
+    }
+    return {-1, -1};
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -248,22 +293,27 @@ Input: nums = [1,2,3,1]
 Output: 2 (index of peak element 3)
 ```
 
-**Key:** Move toward the higher neighbor.
+**Approach:**
+- Move toward the higher neighbor
+- A peak must exist (boundary conditions guarantee this)
 
 **Solution:**
-```python
-def findPeakElement(nums):
-    left, right = 0, len(nums) - 1
+```cpp
+int findPeakElement(vector<int>& nums) {
+    int left = 0, right = nums.size() - 1;
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if nums[mid] < nums[mid + 1]:
-            left = mid + 1   # Peak is on the right
-        else:
-            right = mid      # Peak is on the left (or mid)
+        if (nums[mid] < nums[mid + 1]) {
+            left = mid + 1;   // Peak is on the right
+        } else {
+            right = mid;      // Peak is on the left (or mid)
+        }
+    }
     
-    return left
+    return left;
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -279,30 +329,32 @@ Input: matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
 Output: true
 ```
 
-**Key:** Treat as 1D sorted array.
+**Approach:**
+- Treat as 1D sorted array, convert index
 
 **Solution:**
-```python
-def searchMatrix(matrix, target):
-    if not matrix:
-        return False
+```cpp
+bool searchMatrix(vector<vector<int>>& matrix, int target) {
+    if (matrix.empty()) return false;
     
-    m, n = len(matrix), len(matrix[0])
-    left, right = 0, m * n - 1
+    int m = matrix.size(), n = matrix[0].size();
+    int left = 0, right = m * n - 1;
     
-    while left <= right:
-        mid = left + (right - left) // 2
-        # Convert 1D index to 2D
-        row, col = mid // n, mid % n
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        int row = mid / n, col = mid % n;
         
-        if matrix[row][col] == target:
-            return True
-        elif matrix[row][col] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
+        if (matrix[row][col] == target) {
+            return true;
+        } else if (matrix[row][col] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
     
-    return False
+    return false;
+}
 ```
 **Complexity:** Time O(log(m×n)), Space O(1)
 
@@ -318,20 +370,26 @@ Input: nums = [3,4,5,1,2]
 Output: 1
 ```
 
+**Approach:**
+- Compare mid with right to determine which half contains minimum
+
 **Solution:**
-```python
-def findMin(nums):
-    left, right = 0, len(nums) - 1
+```cpp
+int findMin(vector<int>& nums) {
+    int left = 0, right = nums.size() - 1;
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if nums[mid] > nums[right]:
-            left = mid + 1   # Min is in right half
-        else:
-            right = mid      # Min is in left half (or mid)
+        if (nums[mid] > nums[right]) {
+            left = mid + 1;   // Min is in right half
+        } else {
+            right = mid;      // Min is in left half (or mid)
+        }
+    }
     
-    return nums[left]
+    return nums[left];
+}
 ```
 **Complexity:** Time O(log n), Space O(1)
 
@@ -347,28 +405,35 @@ Input: piles = [3,6,7,11], h = 8
 Output: 4
 ```
 
-**Approach:** Binary search on answer space [1, max(piles)].
+**Approach:**
+- Binary search on answer space [1, max(piles)]
+- For each speed, check if all piles can be finished in h hours
 
 **Solution:**
-```python
-def minEatingSpeed(piles, h):
-    def can_finish(speed):
-        hours = 0
-        for pile in piles:
-            hours += (pile + speed - 1) // speed  # Ceiling division
-        return hours <= h
+```cpp
+int minEatingSpeed(vector<int>& piles, int h) {
+    auto canFinish = [&](int speed) {
+        long hours = 0;
+        for (int pile : piles) {
+            hours += (pile + speed - 1) / speed;  // Ceiling division
+        }
+        return hours <= h;
+    };
     
-    left, right = 1, max(piles)
+    int left = 1, right = *max_element(piles.begin(), piles.end());
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if can_finish(mid):
-            right = mid      # Try smaller speed
-        else:
-            left = mid + 1   # Need faster speed
+        if (canFinish(mid)) {
+            right = mid;      // Try smaller speed
+        } else {
+            left = mid + 1;   // Need faster speed
+        }
+    }
     
-    return left
+    return left;
+}
 ```
 **Complexity:** Time O(n log m), Space O(1)
 
@@ -384,33 +449,43 @@ Input: weights = [1,2,3,4,5,6,7,8,9,10], days = 5
 Output: 15
 ```
 
+**Approach:**
+- Binary search on capacity [max(weights), sum(weights)]
+- Check if given capacity can ship in required days
+
 **Solution:**
-```python
-def shipWithinDays(weights, days):
-    def can_ship(capacity):
-        day_count = 1
-        current_weight = 0
+```cpp
+int shipWithinDays(vector<int>& weights, int days) {
+    auto canShip = [&](int capacity) {
+        int dayCount = 1;
+        int currentWeight = 0;
         
-        for weight in weights:
-            if current_weight + weight > capacity:
-                day_count += 1
-                current_weight = 0
-            current_weight += weight
+        for (int weight : weights) {
+            if (currentWeight + weight > capacity) {
+                dayCount++;
+                currentWeight = 0;
+            }
+            currentWeight += weight;
+        }
         
-        return day_count <= days
+        return dayCount <= days;
+    };
     
-    left = max(weights)      # Must fit largest package
-    right = sum(weights)     # Ship everything in one day
+    int left = *max_element(weights.begin(), weights.end());
+    int right = accumulate(weights.begin(), weights.end(), 0);
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if can_ship(mid):
-            right = mid
-        else:
-            left = mid + 1
+        if (canShip(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
     
-    return left
+    return left;
+}
 ```
 **Complexity:** Time O(n log(sum)), Space O(1)
 
@@ -428,39 +503,46 @@ Input: nums1 = [1,3], nums2 = [2]
 Output: 2.0
 ```
 
-**Key:** Binary search for correct partition.
+**Approach:**
+- Binary search for correct partition point
+- Partition both arrays so left halves have all smaller elements
 
 **Solution:**
-```python
-def findMedianSortedArrays(nums1, nums2):
-    # Ensure nums1 is shorter
-    if len(nums1) > len(nums2):
-        nums1, nums2 = nums2, nums1
+```cpp
+double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+    // Ensure nums1 is shorter
+    if (nums1.size() > nums2.size()) {
+        swap(nums1, nums2);
+    }
     
-    m, n = len(nums1), len(nums2)
-    left, right = 0, m
+    int m = nums1.size(), n = nums2.size();
+    int left = 0, right = m;
     
-    while left <= right:
-        partition1 = (left + right) // 2
-        partition2 = (m + n + 1) // 2 - partition1
+    while (left <= right) {
+        int partition1 = (left + right) / 2;
+        int partition2 = (m + n + 1) / 2 - partition1;
         
-        maxLeft1 = float('-inf') if partition1 == 0 else nums1[partition1 - 1]
-        minRight1 = float('inf') if partition1 == m else nums1[partition1]
+        int maxLeft1 = (partition1 == 0) ? INT_MIN : nums1[partition1 - 1];
+        int minRight1 = (partition1 == m) ? INT_MAX : nums1[partition1];
         
-        maxLeft2 = float('-inf') if partition2 == 0 else nums2[partition2 - 1]
-        minRight2 = float('inf') if partition2 == n else nums2[partition2]
+        int maxLeft2 = (partition2 == 0) ? INT_MIN : nums2[partition2 - 1];
+        int minRight2 = (partition2 == n) ? INT_MAX : nums2[partition2];
         
-        if maxLeft1 <= minRight2 and maxLeft2 <= minRight1:
-            if (m + n) % 2 == 0:
-                return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2
-            else:
-                return max(maxLeft1, maxLeft2)
-        elif maxLeft1 > minRight2:
-            right = partition1 - 1
-        else:
-            left = partition1 + 1
+        if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+            if ((m + n) % 2 == 0) {
+                return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2.0;
+            } else {
+                return max(maxLeft1, maxLeft2);
+            }
+        } else if (maxLeft1 > minRight2) {
+            right = partition1 - 1;
+        } else {
+            left = partition1 + 1;
+        }
+    }
     
-    return 0.0
+    return 0.0;
+}
 ```
 **Complexity:** Time O(log(min(m,n))), Space O(1)
 
@@ -476,34 +558,44 @@ Input: nums = [7,2,5,10,8], k = 2
 Output: 18 (Split: [7,2,5] and [10,8])
 ```
 
+**Approach:**
+- Binary search on answer space [max(nums), sum(nums)]
+- Check if we can split into k or fewer subarrays with given max sum
+
 **Solution:**
-```python
-def splitArray(nums, k):
-    def can_split(max_sum):
-        splits = 1
-        current_sum = 0
+```cpp
+int splitArray(vector<int>& nums, int k) {
+    auto canSplit = [&](int maxSum) {
+        int splits = 1;
+        int currentSum = 0;
         
-        for num in nums:
-            if current_sum + num > max_sum:
-                splits += 1
-                current_sum = num
-            else:
-                current_sum += num
+        for (int num : nums) {
+            if (currentSum + num > maxSum) {
+                splits++;
+                currentSum = num;
+            } else {
+                currentSum += num;
+            }
+        }
         
-        return splits <= k
+        return splits <= k;
+    };
     
-    left = max(nums)
-    right = sum(nums)
+    int left = *max_element(nums.begin(), nums.end());
+    int right = accumulate(nums.begin(), nums.end(), 0);
     
-    while left < right:
-        mid = left + (right - left) // 2
+    while (left < right) {
+        int mid = left + (right - left) / 2;
         
-        if can_split(mid):
-            right = mid
-        else:
-            left = mid + 1
+        if (canSplit(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
     
-    return left
+    return left;
+}
 ```
 **Complexity:** Time O(n log(sum)), Space O(1)
 
