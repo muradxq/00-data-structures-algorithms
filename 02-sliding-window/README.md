@@ -68,13 +68,14 @@ aa[bccbb]         → 2 chars ✓ longest = 5
 ```cpp
 int fixedWindow(vector<int>& arr, int k) {
     int windowSum = 0;
+    //[1] First window
     for (int i = 0; i < k; i++) {
-        windowSum += arr[i];  // First window
+        windowSum += arr[i];  
     }
     int maxSum = windowSum;
     
+    //[2] Slide: add new element, remove old element
     for (int i = k; i < arr.size(); i++) {
-        // Slide: add new element, remove old element
         windowSum += arr[i] - arr[i - k];
         maxSum = max(maxSum, windowSum);
     }
@@ -91,11 +92,11 @@ int variableWindowMax(string& s) {
     unordered_map<char, int> charCount;
     
     for (int windowEnd = 0; windowEnd < s.size(); windowEnd++) {
-        // Expand window: add s[windowEnd] to window
+        //[1] Expand window: add s[windowEnd] to window
         char rightChar = s[windowEnd];
         charCount[rightChar]++;
         
-        // Shrink window while condition is violated
+        //[2] Shrink window while condition is violated
         while (windowIsInvalid(charCount)) {
             char leftChar = s[windowStart];
             charCount[leftChar]--;
@@ -105,7 +106,7 @@ int variableWindowMax(string& s) {
             windowStart++;
         }
         
-        // Update result (window is now valid)
+        //[3] Update result (window is now valid)
         maxLength = max(maxLength, windowEnd - windowStart + 1);
     }
     

@@ -33,8 +33,24 @@ int numSubarrayProductLessThanK(vector<int>& nums, int k) {
     // Your implementation here
     // Track product, shrink when product >= k
     // Count subarrays ending at each position
+    if (k <= 1) return 0;  // Edge case: no subarray can have product < 1 or < 0
     
-    return 0;
+    int l = 0;
+    int count = 0;
+    long long product = 1;  // Use long long to avoid overflow
+    
+    for (int r = 0; r < nums.size(); r++) {
+        product *= nums[r];
+        // Shrink window while product >= k
+        while (l <= r && product >= k) {
+            product /= nums[l];
+            l++;
+        }
+        // Count all subarrays ending at r: [l..r], [l+1..r], ..., [r..r]
+        count += (r - l + 1);
+    }
+    
+    return count;
 }
 
 // ============================================================================

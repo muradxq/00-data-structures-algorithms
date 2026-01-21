@@ -23,9 +23,25 @@ using namespace std;
 // ============================================================================
 int characterReplacement(string s, int k) {
     // Your implementation here
-    // Key insight: window is valid if (window_length - max_freq) <= k
-    
-    return 0;
+    std::unordered_map<char, int> count;
+    int l = 0;
+    int maxFreq = 0;
+    int maxLen = 0;
+    for (int r = 0; r < s.size(); r++) {
+        // Update max when adding a character
+        count[s[r]]++;
+        maxFreq = max(maxFreq, count[s[r]]);  
+        // shrink window
+        while (r - l + 1 - maxFreq > k) {
+            count[s[l]]--;
+            l++;
+            if(count[s[l]] == 0)
+                count.erase(s[l]); 
+        }
+        //valid window
+        maxLen = max(maxLen, r - l + 1);
+    }
+    return maxLen;
 }
 
 // ============================================================================

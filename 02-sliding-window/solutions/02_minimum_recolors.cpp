@@ -34,8 +34,21 @@ using namespace std;
 int minimumRecolors(string blocks, int k) {
     // Your implementation here
     // Count 'W' in first window, then slide and track minimum
-    
-    return 0;
+    //[1] first window
+    int numW = 0;
+    for (int i =0; i <k; i++) {
+        if (blocks[i] == 'W') 
+            numW++;
+    }
+    int minNum = numW;
+    for (int i = k; i< blocks.size(); i++) {
+        if (blocks[i] == 'W')
+            numW++;
+        if (blocks[i-k] == 'W')
+            numW--;
+        minNum =min(minNum, numW);
+    }
+    return minNum;
 }
 
 // ============================================================================

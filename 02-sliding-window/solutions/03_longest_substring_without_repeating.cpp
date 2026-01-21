@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -22,8 +22,20 @@ using namespace std;
 // ============================================================================
 int lengthOfLongestSubstring(string s) {
     // Your implementation here
-    
-    return 0;
+    int l =0;
+    int maxLen = 0;
+    unordered_set<char> seen;
+    for (int r = 0; r < s.size(); r++) {
+        // shrink till its valid window
+        while (seen.count(s[r])) {
+            seen.erase(s[l]);
+            l++;
+        }
+        seen.insert(s[r]);
+        // valid window
+        maxLen = max(maxLen, r-l+1);
+    }
+    return maxLen;
 }
 
 // ============================================================================

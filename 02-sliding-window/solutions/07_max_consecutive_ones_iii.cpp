@@ -21,8 +21,22 @@ using namespace std;
 // ============================================================================
 int longestOnes(vector<int>& nums, int k) {
     // Your implementation here
-    
-    return 0;
+    int l = 0;
+    int maxLen = 0;
+    int numZeros = 0;
+    for (int r = 0; r < nums.size(); r++) {
+        // update status
+        if(nums[r] == 0) numZeros++;
+        // shrink windows
+        while(numZeros > k) {
+            if (nums[l] == 0)
+                numZeros--;
+            l++;
+        }
+        // valid window
+        maxLen = max(maxLen, r-l+1);
+    }
+    return maxLen;
 }
 
 // ============================================================================

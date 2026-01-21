@@ -20,10 +20,48 @@ using namespace std;
 // ============================================================================
 // TODO: Implement your solution here
 // ============================================================================
+bool checkEq(std::vector<int> v1, std::vector<int> v2) {
+    if (v1.size() != v2.size())
+        return false;
+    for (int i =0; i < v1.size(); i++) {
+        if (v1[i] != v2[i])
+        return false;
+    }
+    return true;
+}
 vector<int> findAnagrams(string s, string p) {
     // Your implementation here
+    if (p.size() > s.size()) return {};
     
-    return {};
+    std::vector<int> count1(26, 0);  // Pattern p
+    std::vector<int> count2(26, 0);  // Current window in s
+    
+    // Count characters in pattern p
+    for (auto c : p) {
+        count1[c - 'a']++;
+    }
+    
+    int ns = s.size();
+    int np = p.size();
+    
+    // Initialize first window in s
+    for (int i = 0; i < np; i++) {
+        count2[s[i] - 'a']++;
+    }
+    
+    vector<int> res;
+    if (checkEq(count1, count2))
+        res.push_back(0);
+    
+    // Slide the window
+    for (int i = np; i < ns; i++) {
+        count2[s[i] - 'a']++;           // Add new character
+        count2[s[i - np] - 'a']--;       // Remove old character
+        if (checkEq(count1, count2))
+            res.push_back(i - np + 1);    // Start index of current window
+    }
+    
+    return res;
 }
 
 // ============================================================================

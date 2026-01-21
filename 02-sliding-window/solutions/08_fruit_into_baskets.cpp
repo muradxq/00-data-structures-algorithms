@@ -37,8 +37,23 @@ int totalFruit(vector<int>& fruits) {
     // Your implementation here
     // Use hashmap to track fruit counts
     // Shrink window when more than 2 types
-    
-    return 0;
+    int l =0;
+    std::unordered_map<int, int> count;
+    int maxLen = 0;
+    for (int r = 0; r < fruits.size(); r++) {
+        // update status
+        count[fruits[r]]++;
+        // shrink window till become valid
+        while(count.size() > 2) {
+            count[fruits[l]]--;
+            if (count[fruits[l]] == 0)
+                count.erase(fruits[l]);
+            l++;
+        }
+        // valid window
+        maxLen = max(maxLen, r-l +1);
+    }
+    return maxLen;
 }
 
 // ============================================================================

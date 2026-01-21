@@ -22,8 +22,22 @@ using namespace std;
 // ============================================================================
 int minSubArrayLen(int target, vector<int>& nums) {
     // Your implementation here
+    int l = 0;
+    int sum = 0;
+    int minLen = INT_MAX;
     
-    return 0;
+    for (int r = 0; r < nums.size(); r++) {
+        sum += nums[r];
+        
+        // Shrink window while sum >= target
+        while (sum >= target) {
+            minLen = min(minLen, r - l + 1);
+            sum -= nums[l];
+            l++;
+        }
+    }
+    
+    return minLen == INT_MAX ? 0 : minLen;
 }
 
 // ============================================================================
