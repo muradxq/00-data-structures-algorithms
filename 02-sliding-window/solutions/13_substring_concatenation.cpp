@@ -31,6 +31,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
@@ -38,11 +39,64 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 vector<int> findSubstring(string s, vector<string>& words) {
-    // Your implementation here
-    // Key: All words have same length
-    // Window size = word_length * num_words
+    if (s.empty() || words.empty()) return {};
     
-    return {};
+    int wordLen = words[0].size();
+    int wordCount = words.size();
+    int totalLen = wordLen * wordCount;
+    
+    if (s.size() < totalLen) return {};
+    
+    // Count frequency of each word
+    unordered_map<string, int> wordMap;
+    for (const string& word : words) {
+        wordMap[word]++;
+    }
+    
+    vector<int> result;
+    
+    // Try each starting position (0 to wordLen-1)
+    // Because words can start at different offsets
+    for (int i = 0; i < wordLen; i++) {
+        int left = i;
+        int count = 0;
+        unordered_map<string, int> seen;
+        
+        // Slide word by word (not character by character)
+        for (int j = i; j + wordLen <= s.size(); j += wordLen) {
+            string word = s.substr(j, wordLen);
+            
+            if (wordMap.count(word)) {
+                seen[word]++;
+                count++;
+                
+                // Shrink window if we have too many of this word
+                while (seen[word] > wordMap[word]) {
+                    string leftWord = s.substr(left, wordLen);
+                    seen[leftWord]--;
+                    count--;
+                    left += wordLen;
+                }
+                
+                // Check if we found a valid concatenation
+                if (count == wordCount) {
+                    result.push_back(left);
+                    // Slide window forward by removing leftmost word to find overlapping matches
+                    string leftWord = s.substr(left, wordLen);
+                    seen[leftWord]--;
+                    count--;
+                    left += wordLen;
+                }
+            } else {
+                // Invalid word found, reset window
+                seen.clear();
+                count = 0;
+                left = j + wordLen;
+            }
+        }
+    }
+    
+    return result;
 }
 
 // ============================================================================
@@ -72,7 +126,7 @@ TEST(SubstringConcat, Example3) {
 
 TEST(SubstringConcat, SingleWord) {
     vector<string> words = {"ab"};
-    vector<int> expected = {0, 3};
+    vector<int> expected = {0, 2, 4};
     auto result = findSubstring("ababab", words);
     sort(result.begin(), result.end());
     EXPECT_EQ(result, expected);
