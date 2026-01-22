@@ -40,10 +40,43 @@ struct ListNode {
 // TODO: Implement your solution here
 // ============================================================================
 void reorderList(ListNode* head) {
-    // Your implementation here
-    // Step 1: Find middle
+    if (!head || !head->next) return;
+    
+    // Step 1: Find middle using fast/slow pointers
+    ListNode* slow = head;
+    ListNode* fast = head;
+    
+    while (fast->next && fast->next->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    
     // Step 2: Reverse second half
-    // Step 3: Merge alternately
+    ListNode* prev = nullptr;
+    ListNode* curr = slow->next;
+    slow->next = nullptr;  // Break the list
+    
+    while (curr) {
+        ListNode* next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+    
+    // Step 3: Merge two halves alternately
+    ListNode* p1 = head;
+    ListNode* p2 = prev;  // Head of reversed second half
+    
+    while (p2) {
+        ListNode* p1n = p1->next;
+        ListNode* p2n = p2->next;
+        
+        p1->next = p2;
+        p2->next = p1n;
+        
+        p1 = p1n;
+        p2 = p2n;
+    }
 }
 
 // ============================================================================

@@ -18,11 +18,27 @@ using namespace std;
 // ============================================================================
 // TODO: Implement your solution here
 // ============================================================================
+int getNext(int n) {
+    int next = 0;
+    while (n) {
+        int f = n % 10;
+        next += f * f;
+        n = n /10;
+    }
+    return next;
+}
 bool isHappy(int n) {
     // Your implementation here
-    // Hint: Use Floyd's cycle detection or a set
+    int slow = n;
+    int fast = n;
+    while (fast != 1) {
+        slow = getNext(slow);
+        fast = getNext(getNext(fast));
+        if (fast == slow)
+            break;
+    }
     
-    return false;
+    return fast == 1;
 }
 
 // ============================================================================

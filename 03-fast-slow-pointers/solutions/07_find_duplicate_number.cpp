@@ -31,11 +31,26 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 int findDuplicate(vector<int>& nums) {
-    // Your implementation here
     // Phase 1: Find intersection point using Floyd's algorithm
-    // Phase 2: Find cycle entrance (the duplicate)
+    // Treat array as linked list: nums[i] points to nums[nums[i]]
+    int slow = nums[0];
+    int fast = nums[0];
     
-    return 0;
+    // Move slow one step, fast two steps until they meet
+    do {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+    } while (slow != fast);
+    
+    // Phase 2: Find cycle entrance (the duplicate)
+    // Reset slow to start, move both one step at a time
+    slow = nums[0];
+    while (slow != fast) {
+        slow = nums[slow];
+        fast = nums[fast];
+    }
+    
+    return slow;
 }
 
 // ============================================================================

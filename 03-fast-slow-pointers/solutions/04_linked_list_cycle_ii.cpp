@@ -27,8 +27,29 @@ struct ListNode {
 ListNode* detectCycle(ListNode* head) {
     // Your implementation here
     // Hint: First detect cycle, then reset slow to head
+    ListNode* slow = head;
+    ListNode* fast = head;
     
-    return nullptr;
+    // [1] Detect the cycle
+    while (fast && fast->next) {
+        fast = fast->next->next;
+        slow = slow->next;
+        if (slow == fast)
+            break;
+    }
+    
+    // Check if no cycle exists
+    if (!fast || !fast->next)
+        return nullptr;
+    
+    // [2] Reset slow to head and find cycle start
+    slow = head;
+    while (slow != fast) {
+        slow = slow->next;
+        fast = fast->next;
+    }
+    
+    return slow;
 }
 
 // ============================================================================

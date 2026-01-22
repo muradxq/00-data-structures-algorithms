@@ -38,8 +38,64 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 bool circularArrayLoop(vector<int>& nums) {
-    // Your implementation here
-    // Key: Check direction consistency and cycle length > 1
+    int n = nums.size();
+    
+    // Helper function to get next index
+    auto next = [&](int i) {
+        return ((i + nums[i]) % n + n) % n;
+    };
+    
+    // Try each starting position
+    for (int start = 0; start < n; start++) {
+        if (nums[start] == 0) continue;  // Skip if already visited/marked
+        
+        int slow = start;
+        int fast = start;
+        int direction = nums[start] > 0 ? 1 : -1;  // Track direction
+        
+        // Phase 1: Detect cycle using Floyd's algorithm
+        do {
+            slow = next(slow);
+            fast = next(next(fast));
+            
+            // Check direction consistency
+            if ((nums[slow] > 0 ? 1 : -1) != direction ||
+                (nums[fast] > 0 ? 1 : -1) != direction) {
+                break;  // Direction changed, invalid cycle
+            }
+        } while (slow != fast);
+        
+        // Check if we found a valid cycle
+        if (slow == fast) {
+            // Check if it's not a self-loop (cycle length > 1)
+            // If next(slow) == slow, it's a self-loop
+            int nextSlow = next(slow);
+            if (nextSlow != slow) {
+                // Verify all nodes in cycle have same direction
+                bool validCycle = true;
+                int temp = slow;
+                do {
+                    if ((nums[temp] > 0 ? 1 : -1) != direction) {
+                        validCycle = false;
+                        break;
+                    }
+                    temp = next(temp);
+                } while (temp != slow);
+                
+                if (validCycle) {
+                    return true;
+                }
+            }
+        }
+        
+        // Mark all nodes in this path as visited to avoid rechecking
+        int mark = start;
+        while (nums[mark] != 0 && (nums[mark] > 0 ? 1 : -1) == direction) {
+            int nextMark = next(mark);
+            nums[mark] = 0;  // Mark as visited
+            mark = nextMark;
+        }
+    }
     
     return false;
 }
