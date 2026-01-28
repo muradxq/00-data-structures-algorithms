@@ -24,7 +24,29 @@ using namespace std;
 int splitArray(vector<int>& nums, int k) {
     // Your implementation here
     // Hint: Binary search on [max(nums), sum(nums)]
+    int l = *max_element(nums.begin(), nums.end());
+    int r = accumulate(nums.begin(), nums.end(), 0);
+    while (l < r) {
+        int mid = l + (r - l) / 2;
+        // Can we split with max subarray sum = mid?
+        int subarrays = 1;
+        int currentSum = 0;
+        for (int num : nums) {
+            if (currentSum + num > mid) {
+                subarrays++;
+                currentSum = num;
+            } else {
+                currentSum += num;
+            }
+        }
+        if (subarrays <= k) {
+            r = mid;      // Can do it, try smaller max sum
+        } else {
+            l = mid + 1;  // Need larger max sum
+        }
+    }
     
+    return l;
     return 0;
 }
 

@@ -19,9 +19,20 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 int mySqrt(int x) {
-    // Your implementation here
+    if (x < 2) return x;
     
-    return 0;
+    long l = 1;
+    long r = x / 2 + 1;
+    
+    while (l < r) {
+        long mid = l + (r - l) / 2;
+        if (mid * mid > x) {
+            r = mid;
+        } else {
+            l = mid + 1;
+        }
+    }
+    return l - 1;
 }
 
 // ============================================================================

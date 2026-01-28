@@ -20,9 +20,20 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 int findMin(vector<int>& nums) {
-    // Your implementation here
-    
-    return 0;
+    int l = 0;
+    int r = nums.size() - 1;
+
+    while (l < r) {
+        int mid = l + (r - l) / 2;
+        if (nums[mid] > nums[r]) {
+            // Min is in the right half
+            l = mid + 1;
+        } else {
+            // Min is at mid or in the left half
+            r = mid;
+        }
+    }
+    return nums[l];
 }
 
 // ============================================================================

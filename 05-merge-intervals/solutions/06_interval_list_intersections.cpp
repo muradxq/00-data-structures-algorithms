@@ -20,11 +20,24 @@ using namespace std;
 // ============================================================================
 // TODO: Implement your solution here
 // ============================================================================
-vector<vector<int>> intervalIntersection(vector<vector<int>>& firstList, 
-                                          vector<vector<int>>& secondList) {
-    // Your implementation here
+vector<vector<int>> intervalIntersection(vector<vector<int>>& A, 
+                                          vector<vector<int>>& B) {
+    vector<vector<int>> ans;
+    int i = 0, j = 0;
     
-    return {};
+    while (i < A.size() && j < B.size()) {
+        int lo = max(A[i][0], B[j][0]);
+        int hi = min(A[i][1], B[j][1]);
+        
+        if (lo <= hi)
+            ans.push_back({lo, hi});
+        
+        // Advance the interval that ends first
+        if (A[i][1] < B[j][1]) i++;
+        else j++;
+    }
+    
+    return ans;
 }
 
 // ============================================================================

@@ -28,9 +28,19 @@ bool isBadVersion(int version) {
 // ============================================================================
 int firstBadVersion(int n) {
     // Your implementation here
-    // Hint: Use binary search with left < right condition
-    
-    return 0;
+    int l = 1;
+    int r = n;
+
+    while(l <= r) {
+        int mid = l + (r-l)/2;
+        if(isBadVersion(mid)) {
+            r = mid - 1;
+        } else {
+            l = mid + 1;
+        }
+    }
+
+    return l;
 }
 
 // ============================================================================

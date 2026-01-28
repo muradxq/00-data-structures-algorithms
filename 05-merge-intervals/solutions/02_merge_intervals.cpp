@@ -21,9 +21,24 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 vector<vector<int>> merge(vector<vector<int>>& intervals) {
-    // Your implementation here
+    if (intervals.empty()) return {};
     
-    return {};
+    sort(intervals.begin(), intervals.end());
+    vector<vector<int>> ans;
+    ans.push_back(intervals[0]);
+    
+    for (size_t i = 1; i < intervals.size(); i++) {
+        auto & curr = intervals[i];
+        auto & last = ans.back();
+        if (curr[0] <= last[1]) {
+            // Overlap - extend the last interval
+            last[1] = max(curr[1], last[1]);
+        } else {
+            // No overlap - add new interval
+            ans.push_back(curr);
+        }
+    }
+    return ans;
 }
 
 // ============================================================================

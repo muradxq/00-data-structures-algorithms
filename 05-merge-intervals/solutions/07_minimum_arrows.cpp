@@ -31,10 +31,25 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 int findMinArrowPoints(vector<vector<int>>& points) {
-    // Your implementation here
-    // Hint: Sort by end position, greedily shoot arrows
+    if (points.empty()) return 0;
     
-    return 0;
+    // Sort by end position
+    sort(points.begin(), points.end(), 
+        [](auto& a, auto& b) { return a[1] < b[1]; });
+    
+    int arrows = 1;
+    int arrowPos = points[0][1];  // Shoot at end of first balloon
+    
+    for (size_t i = 1; i < points.size(); i++) {
+        if (points[i][0] > arrowPos) {
+            // Balloon starts after arrow position, need new arrow
+            arrows++;
+            arrowPos = points[i][1];
+        }
+        // else: current arrow bursts this balloon too
+    }
+    
+    return arrows;
 }
 
 // ============================================================================

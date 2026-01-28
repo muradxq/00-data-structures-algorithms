@@ -38,13 +38,40 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 vector<vector<int>> employeeFreeTime(vector<vector<vector<int>>>& schedule) {
-    // Your implementation here
     // Step 1: Flatten all intervals into one list
-    // Step 2: Sort by start time
-    // Step 3: Merge overlapping intervals
-    // Step 4: Find gaps between merged intervals
+    vector<vector<int>> intervals;
+    for (auto& employee : schedule) {
+        for (auto& interval : employee) {
+            intervals.push_back(interval);
+        }
+    }
     
-    return {};
+    if (intervals.empty()) return {};
+    
+    // Step 2: Sort by start time
+    sort(intervals.begin(), intervals.end());
+    
+    // Step 3: Merge overlapping intervals
+    vector<vector<int>> merged;
+    merged.push_back(intervals[0]);
+    
+    for (size_t i = 1; i < intervals.size(); i++) {
+        if (intervals[i][0] <= merged.back()[1]) {
+            // Overlap - extend
+            merged.back()[1] = max(merged.back()[1], intervals[i][1]);
+        } else {
+            // No overlap - add new interval
+            merged.push_back(intervals[i]);
+        }
+    }
+    
+    // Step 4: Find gaps between merged intervals (free times)
+    vector<vector<int>> freeTime;
+    for (size_t i = 1; i < merged.size(); i++) {
+        freeTime.push_back({merged[i-1][1], merged[i][0]});
+    }
+    
+    return freeTime;
 }
 
 // ============================================================================

@@ -21,8 +21,13 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 bool canAttendMeetings(vector<vector<int>>& intervals) {
-    // Your implementation here
+    if (intervals.size() <= 1) return true;
     
+    sort(intervals.begin(), intervals.end());
+    for (size_t i = 0; i < intervals.size() - 1; i++) {
+        if (intervals[i][1] > intervals[i+1][0])
+            return false;
+    }
     return true;
 }
 

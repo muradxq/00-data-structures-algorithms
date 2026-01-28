@@ -20,10 +20,21 @@ using namespace std;
 // TODO: Implement your solution here
 // ============================================================================
 int findPeakElement(vector<int>& nums) {
-    // Your implementation here
     // Key: Move toward the higher neighbor
-    
-    return 0;
+    int l = 0; 
+    int r = nums.size() - 1;
+
+    while (l < r) {
+        int mid = l + (r - l) / 2;
+        if (nums[mid] > nums[mid + 1]) {
+            // Peak is at mid or to the left
+            r = mid;
+        } else {
+            // Peak is to the right
+            l = mid + 1;
+        }
+    }
+    return l;
 }
 
 // ============================================================================

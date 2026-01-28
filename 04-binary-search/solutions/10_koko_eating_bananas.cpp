@@ -23,8 +23,21 @@ using namespace std;
 int minEatingSpeed(vector<int>& piles, int h) {
     // Your implementation here
     // Hint: Binary search on answer space [1, max(piles)]
-    
-    return 0;
+    int l = 1;
+    int r = *max_element(piles.begin(), piles.end());
+    while (l < r) {
+        int mid = l + (r-l) / 2;
+        int hours = 0;
+        for (int i=0; i< piles.size(); i++) {
+            hours += (piles[i] + mid - 1) / mid;
+        }
+        if (hours <= h) {
+            r = mid;
+        } else {
+            l = mid+1;
+        }
+    }
+    return l;
 }
 
 // ============================================================================

@@ -23,8 +23,19 @@ using namespace std;
 int eraseOverlapIntervals(vector<vector<int>>& intervals) {
     // Your implementation here
     // Key: Greedy - always keep interval that ends earliest
-    
-    return 0;
+    if (intervals.empty()) return 0;
+    // Sort by END time (greedy: keep earliest ending)
+    sort(intervals.begin(), intervals.end(), 
+         [](auto& a, auto& b) { return a[1] < b[1]; });
+    int kept =1;
+    int lastEnd = intervals[0][1];
+    for (int i = 1; i < intervals.size(); i++) {
+        if (lastEnd <= intervals[i][0]) {
+            kept++;
+            lastEnd = intervals[i][1];
+        }
+    }
+    return intervals.size() - kept;
 }
 
 // ============================================================================

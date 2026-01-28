@@ -24,7 +24,30 @@ using namespace std;
 int shipWithinDays(vector<int>& weights, int days) {
     // Your implementation here
     // Hint: Binary search on [max(weights), sum(weights)]
+    int l = *max_element(weights.begin(), weights.end());
+    int r = accumulate(weights.begin(), weights.end(), 0);
+    while (l < r) {
+        int mid = l + (r - l) / 2;
+        
+        // Can we ship with capacity mid?
+        int daysNeeded = 1;
+        int currentLoad = 0;
+        for (int w : weights) {
+            if (currentLoad + w > mid) {
+                daysNeeded++;
+                currentLoad = 0;
+            }
+            currentLoad += w;
+        }
+        
+        if (daysNeeded <= days) {
+            r = mid;      // Can do it, try smaller capacity
+        } else {
+            l = mid + 1;  // Need more capacity
+        }
+    }
     
+    return l;
     return 0;
 }
 

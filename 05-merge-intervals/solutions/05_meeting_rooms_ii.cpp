@@ -25,8 +25,19 @@ int minMeetingRooms(vector<vector<int>>& intervals) {
     // Your implementation here
     // Approach 1: Two pointers with sorted starts/ends
     // Approach 2: Min heap tracking end times
-    
-    return 0;
+    vector<pair<int, int>> events;
+    for (auto interval: intervals) {
+        events.push_back({interval[0], 1});
+        events.push_back({interval[1], -1});
+    }
+    sort(events.begin(), events.end());
+    int currNumRooms = 0;
+    int maxNumRooms = 0;
+    for(auto event : events) {
+        currNumRooms += event.second;
+        maxNumRooms = max(maxNumRooms, currNumRooms);
+    }
+    return maxNumRooms;
 }
 
 // ============================================================================
