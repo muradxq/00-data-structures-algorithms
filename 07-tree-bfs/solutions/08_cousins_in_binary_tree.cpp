@@ -54,8 +54,41 @@ bool isCousins(TreeNode* root, int x, int y) {
     // Your implementation here
     // Track (node, parent) pairs
     // Check same level + different parents
+    queue<tuple<TreeNode*, int, TreeNode*>> q;  // (node, depth, parent)
+    q.push({root, 0, nullptr});
     
-    return false;
+    int xDepth = -1, yDepth = -1;
+    TreeNode* xParent = nullptr;
+    TreeNode* yParent = nullptr;
+    
+    while (!q.empty()) {
+        auto [node, depth, parent] = q.front();
+        q.pop();
+        
+        // Check if this node is x or y
+        if (node->val == x) {
+            xDepth = depth;
+            xParent = parent;
+        }
+        if (node->val == y) {
+            yDepth = depth;
+            yParent = parent;
+        }
+        
+        // Early exit if both found
+        if (xDepth != -1 && yDepth != -1) {
+            break;
+        }
+        
+        if (node->left) {
+            q.push({node->left, depth + 1, node});
+        }
+        if (node->right) {
+            q.push({node->right, depth + 1, node});
+        }
+    }
+    
+    return xDepth == yDepth && xParent != yParent;
 }
 
 // ============================================================================

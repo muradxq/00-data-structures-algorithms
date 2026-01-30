@@ -49,7 +49,23 @@ Node* connect(Node* root) {
     // Your implementation here
     // BFS approach: connect nodes at each level
     // Or use O(1) space by using already established next pointers
-    
+    if (!root) return nullptr; 
+    queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int levelSize = q.size();
+        for(int i = 0; i < levelSize; i++) {
+            Node* curr = q.front();
+            q.pop();
+            // Connect to next node if not last in level
+            if (i < levelSize - 1) {
+                curr->next = q.front();
+            }
+            // Add children
+            if(curr->left) q.push(curr->left);
+            if(curr->right) q.push(curr->right);
+        } 
+    }
     return root;
 }
 
