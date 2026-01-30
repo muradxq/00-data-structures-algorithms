@@ -22,8 +22,22 @@ using namespace std;
 int missingNumber(vector<int>& nums) {
     // Your implementation here
     // Can use cyclic sort or XOR approach
+    int i = 0;
+    int n = nums.size();
+    while (i < n) {
+        int correctIdx = nums[i];
+        if(correctIdx < n && nums[i] != nums[correctIdx]) {
+            swap(nums[i], nums[correctIdx]);
+        } else {
+            i++;
+        }
+    }
+    for (int i =0; i < n; i++) {
+        if(nums[i] != i) 
+            return i;
+    }
     
-    return 0;
+    return n;
 }
 
 // ============================================================================

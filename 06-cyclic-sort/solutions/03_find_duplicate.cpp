@@ -23,6 +23,23 @@ int findDuplicate(vector<int>& nums) {
     // Your implementation here
     // Can use cyclic sort or Floyd's cycle detection
     
+    //  Input: nums = [1,3,4,2,2]
+    //  Input: nums = [1,2,3,4,2]
+    int i = 0;
+    int n = nums.size();
+    while(i < n) {
+        int correctIdx = nums[i] -1;
+        if(nums[i] != nums[correctIdx]) {
+            swap(nums[i], nums[correctIdx]);
+        } else {
+            i++;
+        }
+    }
+    for(int i =0; i < n; i++) {
+        if(nums[i]-1 != i) {
+            return nums[i];
+        }
+    }
     return 0;
 }
 

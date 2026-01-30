@@ -22,8 +22,23 @@ using namespace std;
 int firstMissingPositive(vector<int>& nums) {
     // Your implementation here
     // Key: Answer must be in range [1, n+1]
-    
-    return 0;
+    int i =0;
+    int n = nums.size();
+    while(i < n) {
+        int correctIdx = nums[i] -1;
+        if(correctIdx >= 0 && correctIdx < n && nums[i] != nums[correctIdx]) {
+            swap(nums[i], nums[correctIdx]);
+        } else {
+            i++;
+        }
+    }
+
+    for(int i = 0; i < n; i++) {
+        if (nums[i] - 1 != i) {
+            return i + 1;
+        }
+    }
+    return n + 1;
 }
 
 // ============================================================================

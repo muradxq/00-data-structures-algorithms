@@ -21,8 +21,27 @@ using namespace std;
 // ============================================================================
 vector<int> findDisappearedNumbers(vector<int>& nums) {
     // Your implementation here
-    
-    return {};
+    // Input: nums = [4,3,2,7,8,2,3,1]
+    // Input: nums = [1,2,3,4,3,2,7,8]
+
+    // implement cyclic sorting:
+    int i = 0;
+    int n = nums.size();
+    while (i < n) {
+        int idx = nums[i]-1;
+        if (idx < n && nums[i] != nums[idx]) {
+            swap(nums[i], nums[idx]);
+        } else {
+            i++;
+        }
+    }
+    vector<int> res;
+    for (int i =0; i < n; i++) {
+        if(nums[i]-1 != i) {
+            res.push_back(i+1);
+        }
+    } 
+    return res;
 }
 
 // ============================================================================
